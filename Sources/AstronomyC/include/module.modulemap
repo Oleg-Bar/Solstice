@@ -1,0 +1,4 @@
+module TerraAstronomy {
+    header "astronomy.h"
+    export *
+}
