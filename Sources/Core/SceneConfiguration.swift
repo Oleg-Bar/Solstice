@@ -9,10 +9,10 @@ public struct SceneConfiguration: Sendable {
     public var automaticIPLocation = false // enabled only after explicit consent to contact ipwho.is
     public var moonEnabled = true
     public var starBrightness = 0.055
-    public var milkyWayBrightness = 0.22 // restrained photographic background
+    public var milkyWayBrightness = 0.27 // slightly brighter, still subordinate to Earth
     public var atmosphereIntensity = 0.58
     public var nightLightsIntensity = 2.2
-    public var clockScale = 1.0
+    public var clockScale = 1.01 // all city clocks share one radius, increased by 1%
     public var cityLabelScale = 1.0
     public var preferredFramesPerSecond = 1 // maximum battery saving; clocks and astronomy remain current each second
     public var maximumDrawableDimension = 5120.0 // native 5K output; smaller displays keep their native drawable size

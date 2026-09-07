@@ -28,4 +28,14 @@ public struct CameraBasis: Sendable {
     public func project(_ point: SIMD3<Double>) -> SIMD3<Double> {
         SIMD3(simd_dot(point, right), simd_dot(point, up), simd_dot(point, front))
     }
+    /// Maps a geographic unit vector to the exact orthographic point used by the globe shader.
+    /// The z component remains the signed depth, so callers can distinguish the rear hemisphere.
+    public func screenProjection(_ point: SIMD3<Double>, earthCenter: SIMD2<Double>, earthRadius: Double) -> SIMD3<Double> {
+        let projected = project(point)
+        return SIMD3(
+            earthCenter.x + projected.x * earthRadius,
+            earthCenter.y + projected.y * earthRadius,
+            projected.z
+        )
+    }
 }

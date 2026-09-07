@@ -24,6 +24,28 @@ final class TerraCoreTests: XCTestCase {
         XCTAssertEqual(camera.project(-CitiesConfiguration.cities[0].position).z,-1,accuracy: 1e-12)
         XCTAssertEqual(simd_dot(camera.up,camera.front),0,accuracy: 1e-12)
         XCTAssertEqual(simd_dot(camera.right,camera.up),0,accuracy: 1e-12)
+        let screenCenter = SIMD2(720.0,387.0)
+        let madridScreen = camera.screenProjection(CitiesConfiguration.cities[0].position,earthCenter: screenCenter,earthRadius: 315)
+        XCTAssertEqual(madridScreen.x,screenCenter.x,accuracy: 1e-10)
+        XCTAssertEqual(madridScreen.y,screenCenter.y,accuracy: 1e-10)
+        XCTAssertEqual(madridScreen.z,1,accuracy: 1e-12)
+        let singapore = CitiesConfiguration.cities[1]
+        let projected = camera.project(singapore.position)
+        let singaporeScreen = camera.screenProjection(singapore.position,earthCenter: screenCenter,earthRadius: 315)
+        XCTAssertEqual(singaporeScreen.x,screenCenter.x+projected.x*315,accuracy: 1e-10)
+        XCTAssertEqual(singaporeScreen.y,screenCenter.y+projected.y*315,accuracy: 1e-10)
+        XCTAssertEqual(singaporeScreen.z,projected.z,accuracy: 1e-12)
+        let equatorialCamera = CameraBasis(longitude: 0,latitude: 0)
+        let eastEdge = equatorialCamera.screenProjection(
+            GlobeGeometry.position(latitude: 0,longitude: 90),earthCenter: screenCenter,earthRadius: 315)
+        XCTAssertEqual(eastEdge.x,screenCenter.x+315,accuracy: 1e-10)
+        XCTAssertEqual(eastEdge.y,screenCenter.y,accuracy: 1e-10)
+        XCTAssertEqual(eastEdge.z,0,accuracy: 1e-10)
+        let northEdge = equatorialCamera.screenProjection(
+            GlobeGeometry.position(latitude: 90,longitude: 0),earthCenter: screenCenter,earthRadius: 315)
+        XCTAssertEqual(northEdge.x,screenCenter.x,accuracy: 1e-10)
+        XCTAssertEqual(northEdge.y,screenCenter.y+315,accuracy: 1e-10)
+        XCTAssertEqual(northEdge.z,0,accuracy: 1e-10)
     }
     func testHorizonTransitionIsContinuousAndComplementary() {
         XCTAssertEqual(GlobeGeometry.surfaceOpacity(depth: -0.2),0)
@@ -153,7 +175,8 @@ final class TerraCoreTests: XCTestCase {
         XCTAssertTrue(!configuration.automaticIPLocation)
         XCTAssertEqual(configuration.maximumDrawableDimension,5120)
         XCTAssertEqual(configuration.preferredFramesPerSecond,1)
-        XCTAssertEqual(configuration.milkyWayBrightness,0.22,accuracy: 1e-12)
+        XCTAssertEqual(configuration.milkyWayBrightness,0.27,accuracy: 1e-12)
+        XCTAssertEqual(configuration.clockScale,1.01,accuracy: 1e-12)
         let good = #"{"success":true,"city":"Singapore","latitude":1.35,"longitude":103.8,"timezone":{"id":"Asia/Singapore"}}"#
         do { let place = try LocationResponseParser.parse(Data(good.utf8)); XCTAssertEqual(place.name,"Singapore"); XCTAssertTrue(place.isValid) }
         catch { XCTAssertTrue(false) }

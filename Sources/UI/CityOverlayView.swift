@@ -44,11 +44,7 @@ final class CityOverlayView: NSView {
             (caption as NSString).draw(in: CGRect(x: 20,y: 18,width: bounds.width-40,height: 32),withAttributes: style)
         }
         if configuration.milkyWayBrightness > 0 {
-            let credit = "Milky Way: ESO/S. Brunier · CC BY 4.0"
-            let style: [NSAttributedString.Key:Any] = [.font: NSFont.systemFont(ofSize: 8,weight: .regular),
-                .foregroundColor: NSColor.white.withAlphaComponent(0.28)]
-            let size = (credit as NSString).size(withAttributes: style)
-            (credit as NSString).draw(at: CGPoint(x: bounds.width-size.width-14,y: 10),withAttributes: style)
+            drawRightAligned("created by Oleg Bardakov.",y: 10,size: 8,weight: .regular,alpha: 0.30)
         }
         let cities = self.cities, c = configuration
         let now = ProcessInfo.processInfo.systemUptime
@@ -65,7 +61,14 @@ final class CityOverlayView: NSView {
             let p = basis.project(city.position)
             let opacity = GlobeGeometry.surfaceOpacity(depth: p.z)
             let state = states[index]
-            let anchor = CGPoint(x: earthCenter.x+p.x*earthRadius,y: earthCenter.y+p.y*earthRadius)
+            let exactProjection = basis.screenProjection(
+                city.position,
+                earthCenter: SIMD2(Double(earthCenter.x),Double(earthCenter.y)),
+                earthRadius: Double(earthRadius)
+            )
+            // This is the city's exact orthographic latitude/longitude projection.
+            // Both foreground and rear-hemisphere indicators terminate at this point.
+            let anchor = CGPoint(x: exactProjection.x,y: exactProjection.y)
             let radius = baseRadius
             var center = anchor
             if earthRadius < 100 {
@@ -103,7 +106,11 @@ final class CityOverlayView: NSView {
             hiddenCenter.x = min(bounds.width-hiddenRadius*2.5,max(hiddenRadius*2.5,hiddenCenter.x))
             hiddenCenter.y = min(bounds.height-hiddenRadius*2,max(hiddenRadius*3.2,hiddenCenter.y))
             if opacity < 0.99 {
-                drawGlassArrow(cg,from: hiddenCenter,to: limb,radius: hiddenRadius,opacity: 1-opacity,time: now)
+                // A front-side city points to its exact map coordinate. A rear-side city has no
+                // visible point on the current map, so its indicator truthfully ends at the limb
+                // in the exact bearing of that coordinate instead of pointing at a wrong country.
+                let target = p.z >= 0 ? anchor : limb
+                drawGlassArrow(cg,from: hiddenCenter,to: target,radius: hiddenRadius,opacity: 1-opacity,time: now)
                 AnalogClock.draw(center: hiddenCenter,radius: hiddenRadius,city: city,state: state,opacity: 1-opacity,labelScale: c.cityLabelScale)
             }
         }
@@ -131,7 +138,21 @@ final class CityOverlayView: NSView {
         cg.move(to: CGPoint(x: tip.x-vx*7-vy*3,y: tip.y-vy*7+vx*3))
         cg.addLine(to: tip)
         cg.addLine(to: CGPoint(x: tip.x-vx*7+vy*3,y: tip.y-vy*7-vx*3))
-        cg.strokePath(); cg.restoreGState()
+        cg.strokePath()
+        // A small endpoint makes the exact geographic target unambiguous.
+        cg.setFillColor(NSColor.white.withAlphaComponent(0.72).cgColor)
+        cg.fillEllipse(in: CGRect(x: tip.x-2,y: tip.y-2,width: 4,height: 4))
+        cg.restoreGState()
+    }
+
+    private func drawRightAligned(_ value: String,y: CGFloat,size: CGFloat,weight: NSFont.Weight,alpha: CGFloat) {
+        let style: [NSAttributedString.Key:Any] = [
+            .font: NSFont.systemFont(ofSize: size,weight: weight),
+            .foregroundColor: NSColor.white.withAlphaComponent(alpha),
+            .kern: size*0.035
+        ]
+        let width = (value as NSString).size(withAttributes: style).width
+        (value as NSString).draw(at: CGPoint(x: bounds.width-width-14,y: y),withAttributes: style)
     }
 
 }
