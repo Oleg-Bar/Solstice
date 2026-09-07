@@ -8,20 +8,29 @@ final class CityOverlayView: NSView {
     private var configuration = SceneConfiguration()
     private var basis = CameraBasis(longitude: 15,latitude: 15)
     private var cities = CitiesConfiguration.cities
+    private var selectedCities = CitiesConfiguration.cities
     private var observer: ObserverLocation?
     private var states: [CityClockState] = []
+    private var citiesDirty = true
     private var lastSecond = Int.min
     private var previousCenters: [String: CGPoint] = [:]
     private var lastLayoutTime = ProcessInfo.processInfo.systemUptime
     private var previousSize = CGSize.zero
     override var isOpaque: Bool { false }
     override func hitTest(_ point: NSPoint) -> NSView? { nil }
+    func setSelectedCities(_ cities: [City]) {
+        selectedCities = cities
+        // Keep the current city/state pair intact until update() can replace both.
+        citiesDirty = true; lastSecond = Int.min
+        previousCenters.removeAll()
+    }
     func update(date: Date, basis: CameraBasis, configuration: SceneConfiguration, observer: ObserverLocation) {
         self.basis = basis; self.configuration = configuration
         let second = Int(date.timeIntervalSince1970)
-        if self.observer != observer {
-            self.observer = observer; cities = CitiesConfiguration.including(observer: observer)
-            lastSecond = Int.min; previousCenters.removeAll()
+        if self.observer != observer || citiesDirty {
+            self.observer = observer; cities = CitiesConfiguration.including(observer: observer,selection: selectedCities)
+            states = cities.map { CityClockState(city: $0,date: date) }
+            lastSecond = second; citiesDirty = false; previousCenters.removeAll()
         }
         if lastSecond != second {
             states = cities.map { CityClockState(city: $0,date: date) }; lastSecond = second
@@ -34,6 +43,13 @@ final class CityOverlayView: NSView {
             let style: [NSAttributedString.Key:Any] = [.font: NSFont.monospacedDigitSystemFont(ofSize: 11,weight: .regular),.foregroundColor: NSColor.white.withAlphaComponent(0.58)]
             (caption as NSString).draw(in: CGRect(x: 20,y: 18,width: bounds.width-40,height: 32),withAttributes: style)
         }
+        if configuration.milkyWayBrightness > 0 {
+            let credit = "Milky Way: ESO/S. Brunier · CC BY 4.0"
+            let style: [NSAttributedString.Key:Any] = [.font: NSFont.systemFont(ofSize: 8,weight: .regular),
+                .foregroundColor: NSColor.white.withAlphaComponent(0.28)]
+            let size = (credit as NSString).size(withAttributes: style)
+            (credit as NSString).draw(at: CGPoint(x: bounds.width-size.width-14,y: 10),withAttributes: style)
+        }
         let cities = self.cities, c = configuration
         let now = ProcessInfo.processInfo.systemUptime
         let easing = 1-exp(-min(0.1,max(0.001,now-lastLayoutTime))/0.14)
@@ -41,17 +57,16 @@ final class CityOverlayView: NSView {
         if previousSize != bounds.size { previousCenters.removeAll(); previousSize = bounds.size }
         let smaller = min(bounds.width,bounds.height), earthRadius = smaller*c.earthDiameter/2
         let earthCenter = CGPoint(x: bounds.midX,y: bounds.height*c.earthVerticalPosition)
-        let baseRadius = min(34,max(22,earthRadius*0.105))*c.clockScale
-        // Stable slots avoid jumping when another city crosses the limb.
-        let slotHeight = min(smaller*0.16,bounds.height*0.65/Double(max(1,cities.count)))
-        let hiddenRadius = min(baseRadius*0.84,slotHeight/4.5)
+        let baseRadius = min(46,max(28,earthRadius*0.13))*c.clockScale
+        // Every clock uses the same diameter as the foreground observer clock.
+        let hiddenRadius = baseRadius
         var occupied: [CGRect] = []
         for (index,city) in cities.enumerated() {
             let p = basis.project(city.position)
             let opacity = GlobeGeometry.surfaceOpacity(depth: p.z)
             let state = states[index]
             let anchor = CGPoint(x: earthCenter.x+p.x*earthRadius,y: earthCenter.y+p.y*earthRadius)
-            let radius = baseRadius*(0.82+0.18*opacity)
+            let radius = baseRadius
             var center = anchor
             if earthRadius < 100 {
                 let length = hypot(p.x,p.y)
@@ -74,10 +89,8 @@ final class CityOverlayView: NSView {
             if opacity > 0.01 {
                 occupied.append(CGRect(x: center.x-envelope.width/2,y: center.y-radius*2.5,width: envelope.width,height: envelope.height))
                 cg.saveGState()
-                cg.setAlpha(opacity); cg.setStrokeColor(NSColor.white.withAlphaComponent(0.5).cgColor); cg.setLineWidth(0.7)
                 if hypot(center.x-anchor.x,center.y-anchor.y) > radius {
-                    cg.move(to: anchor); cg.addLine(to: center); cg.strokePath()
-                    cg.setFillColor(NSColor.white.cgColor); cg.fillEllipse(in: CGRect(x: anchor.x-2,y: anchor.y-2,width: 4,height: 4))
+                    drawGlassArrow(cg,from: center,to: anchor,radius: radius,opacity: opacity,time: now)
                 }
                 cg.restoreGState()
                 AnalogClock.draw(center: center,radius: radius,city: city,state: state,opacity: opacity,labelScale: c.cityLabelScale)

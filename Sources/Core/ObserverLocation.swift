@@ -17,6 +17,16 @@ public struct ObserverLocation: Codable, Equatable, Sendable {
     }
 }
 
+public enum IPLocationConsentStore {
+    private static let key = "ipLocationConsent"
+    private static var defaults: UserDefaults { UserDefaults(suiteName: "studio.terra.shared") ?? .standard }
+    public static var decision: Bool? {
+        guard defaults.object(forKey: key) != nil else { return nil }
+        return defaults.bool(forKey: key)
+    }
+    public static func setAllowed(_ allowed: Bool) { defaults.set(allowed,forKey: key) }
+}
+
 public enum LocationResponseParser {
     private struct Response: Decodable {
         struct Zone: Decodable { let id: String }

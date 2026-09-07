@@ -29,7 +29,7 @@ asset_group = add('assets', '{isa = PBXGroup; name = Resources; children = '+ref
 products = []; targets = []; schemes = []
 base = {'MACOSX_DEPLOYMENT_TARGET':'13.0','SDKROOT':'macosx','SWIFT_VERSION':'5.0','CLANG_ENABLE_MODULES':'YES',
         'CODE_SIGN_IDENTITY':'-','CODE_SIGN_STYLE':'Manual','DEVELOPMENT_TEAM':'','COMBINE_HIDPI_IMAGES':'YES',
-        'GENERATE_INFOPLIST_FILE':'YES','CURRENT_PROJECT_VERSION':'2','MARKETING_VERSION':'0.3.0',
+        'GENERATE_INFOPLIST_FILE':'YES','CURRENT_PROJECT_VERSION':'1','MARKETING_VERSION':'1.0',
         'HEADER_SEARCH_PATHS':'$(SRCROOT)/Sources/AstronomyC/include',
         'SWIFT_INCLUDE_PATHS':'$(SRCROOT)/Sources/AstronomyC/include',
         'ENABLE_HARDENED_RUNTIME':'NO','SWIFT_EMIT_LOC_STRINGS':'NO'}

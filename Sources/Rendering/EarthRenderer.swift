@@ -35,12 +35,15 @@ final class EarthRenderer {
         descriptor.fragmentFunction = library.makeFunction(name: "sceneFragment")
         descriptor.colorAttachments[0].pixelFormat = .bgra8Unorm_srgb
         pipeline = try device.makeRenderPipelineState(descriptor: descriptor)
-        textures = try ["earth-day.jpg", "earth-night.jpg", "earth-clouds.jpg", "moon.jpg"].enumerated().map { index, name in
+        textures = try ["earth-day.jpg", "earth-night.jpg", "earth-clouds.jpg", "moon.jpg", "milky-way.jpg"].enumerated().map { index, name in
             let url = try SceneAssets.resourceURL(name)
+            // A 4K equirectangular map provides about 2K samples across the visible
+            // hemisphere, matching Terra's ~2K Earth disc on a 5K screen.
+            let textureLimit = index == 3 ? 2048 : 4096
             guard let source = CGImageSourceCreateWithURL(url as CFURL,nil),
                   let image = CGImageSourceCreateThumbnailAtIndex(source,0,[
                     kCGImageSourceCreateThumbnailFromImageAlways: true,
-                    kCGImageSourceThumbnailMaxPixelSize: 4096,
+                    kCGImageSourceThumbnailMaxPixelSize: textureLimit,
                     kCGImageSourceShouldCacheImmediately: true
                   ] as CFDictionary) else { throw RenderError.unavailable }
             guard let context = CGContext(data: nil, width: image.width, height: image.height,

@@ -52,8 +52,6 @@ final class DebugControls: NSPanel {
         slider("Ночные огни",\.nightLightsIntensity,0.5,4)
         slider("Размер часов",\.clockScale,0.65,1.35)
         slider("Размер подписей",\.cityLabelScale,0.8,1.3)
-        let scale = NSButton(checkboxWithTitle: "Реальный масштаб расстояния Земля–Луна",target: self,action: #selector(togglePhysicalScale(_:)))
-        scale.state = scene.configuration.physicalMoonScale ? .on : .off; stack.addArrangedSubview(scale)
         let moon = NSButton(checkboxWithTitle: "Показывать Луну",target: self,action: #selector(toggleMoon(_:)))
         moon.state = scene.configuration.moonEnabled ? .on : .off; stack.addArrangedSubview(moon)
         let rate = NSPopUpButton(); rate.addItems(withTitles: ["Время: 1×","Время: 10×","Время: 100×","Время: 1000×"])
@@ -77,9 +75,7 @@ final class DebugControls: NSPanel {
         }
     }
     @objc private func refreshObserver() { scene?.refreshLocation(force: true) }
-    @objc private func togglePhysicalScale(_ sender: NSButton) { scene?.configuration.physicalMoonScale = sender.state == .on }
     @objc private func toggleMoon(_ sender: NSButton) { scene?.configuration.moonEnabled = sender.state == .on }
-    @objc private func toggleSide(_ sender: NSButton) { scene?.configuration.moonOnRight = sender.state == .on }
     @objc private func changeTime(_ sender: NSPopUpButton) {
         if sender.indexOfSelectedItem == 0 { scene?.timeline.reset() }
         else { scene?.timeline.setRate([1,10,100,1000][sender.indexOfSelectedItem]) }

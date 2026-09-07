@@ -23,18 +23,27 @@ float noise(float2 p) {
     return mix(mix(hash21(i),hash21(i+float2(1,0)),f.x),
                mix(hash21(i+float2(0,1)),hash21(i+1),f.x),f.y);
 }
-float3 starField(float2 pixel, constant Uniforms &u) {
+float3 starField(float2 pixel, constant Uniforms &u,texture2d<float> milkyWay) {
     // A stable angular field; no per-frame random generation or flashing stars.
     float2 p = pixel / min(u.viewport.x, u.viewport.y);
     float2 cell = floor(p * 520), local = fract(p * 520);
     float seed = hash21(cell);
     float2 center = float2(hash21(cell+8), hash21(cell+19));
     float star = exp(-dot(local-center,local-center) * 150) * step(0.989, seed);
-    float band = exp(-pow((p.y - p.x * 0.43 - 0.36) / 0.16, 2.0));
-    float dust = noise(p * 13) * noise(p * 39);
+    constexpr sampler sky(filter::linear,mip_filter::linear,s_address::repeat,t_address::clamp_to_edge);
+    float2 skyUV = pixel/u.viewport.xy;
+    float aspect = u.viewport.x/u.viewport.y;
+    float2 q = skyUV-0.5; q.x *= aspect;
+    constexpr float angle = -0.30;
+    q = float2(cos(angle)*q.x-sin(angle)*q.y,sin(angle)*q.x+cos(angle)*q.y);
+    q.x /= aspect; skyUV = q+float2(0.58,0.50);
+    float3 panorama = milkyWay.sample(sky,skyUV).rgb;
+    panorama = max(panorama-float3(0.004),0.0);
+    float luminance = dot(panorama,float3(0.2126,0.7152,0.0722));
+    panorama = mix(float3(luminance)*float3(0.78,0.86,1.0),panorama,0.42);
     float3 base = float3(0.0);
     return base + star * u.style.x * mix(float3(0.64,0.76,0.91),float3(1,0.88,0.73),seed)
-        + band * dust * u.style.y * float3(0.024,0.027,0.035);
+        + panorama*u.style.y*0.38;
 }
 float2 sphericalUV(float3 n) {
     return float2(atan2(n.x,n.z)/(2*M_PI_F)+0.5, 0.5-asin(clamp(n.y,-1.0,1.0))/M_PI_F);
@@ -120,9 +129,10 @@ float3 atmosphere(float2 p,float3 background,constant Uniforms &u) {
 }
 fragment float4 sceneFragment(VertexOut in [[stage_in]], constant Uniforms &u [[buffer(0)]],
     texture2d<float> day [[texture(0)]], texture2d<float> night [[texture(1)]],
-    texture2d<float> clouds [[texture(2)]], texture2d<float> moonMap [[texture(3)]]) {
+    texture2d<float> clouds [[texture(2)]], texture2d<float> moonMap [[texture(3)]],
+    texture2d<float> milkyWay [[texture(4)]]) {
     float2 pixel = float2(in.position.x,u.viewport.y-in.position.y);
-    float3 color = starField(pixel,u);
+    float3 color = starField(pixel,u,milkyWay);
     float2 p = (pixel-float2(u.viewport.x*0.5,u.viewport.w))/u.viewport.z;
     float r = length(p);
     if (r < 1) {

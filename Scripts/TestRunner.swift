@@ -28,9 +28,11 @@ func XCTAssertGreaterThanOrEqual(_ a: Double,_ b: Double,file: StaticString = #f
             ("debug time isolation",t.testDebugTimelineContinuityAndProductionIsolation),
             ("mean lunar phase",t.testMeanLunarPhases),
             ("lunar ephemeris / observer",t.testLunarEphemerisAndObserver),
-            ("physical scale / horizon",t.testPhysicalLayoutAndHorizon),
+            ("physical body scale / readable distance / horizon",t.testReadablePhysicalBodyScaleAndHorizon),
             ("IP response validation",t.testIPResponseValidation),
-            ("dynamic observer clock",t.testDynamicObserverClock)
+            ("dynamic observer clock",t.testDynamicObserverClock),
+            ("macOS system city catalog",t.testSystemCityCatalog),
+            ("localized city names / custom removal",t.testSystemCityLocalizationAndCustomRemoval)
         ]
         for (name,test) in tests { let before = failures; test(); print("\(failures == before ? "PASS" : "FAIL") \(name)") }
         print("\(tests.count) tests; \(assertions) assertions; \(failures) failures")

@@ -3,6 +3,9 @@ https://edu.solarsystemscope.com/textures/
 https://creativecommons.org/licenses/by/4.0/
 Rendered with modified lighting and color; downsampled on load.
 Moon: NASA SVS / Ernie Wright; NASA/GSFC/Arizona State University. https://svs.gsfc.nasa.gov/4720/
+Milky Way panorama: ESO/S. Brunier. CC BY 4.0.
+https://www.hq.eso.org/public/images/eso0932a/
+https://creativecommons.org/licenses/by/4.0/
 Astronomy Engine: Don Cross, MIT. Pinned commit 865d3da7d8112bbc7911238052c6af4aaf877181
 https://github.com/cosinekitty/astronomy
 

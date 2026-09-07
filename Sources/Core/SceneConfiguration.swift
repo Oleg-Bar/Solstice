@@ -6,21 +6,16 @@ public struct SceneConfiguration: Sendable {
     public var rotationDegreesPerSecond = 0.0 // location-focused view; optional orbit in preview
     public var initialLongitude = -3.7038
     public var cameraLatitude = 40.4168
-    public var automaticIPLocation = false // enable only after approval of ipwho.is
+    public var automaticIPLocation = false // enabled only after explicit consent to contact ipwho.is
     public var moonEnabled = true
-    public var moonOnRight = true
-    public var moonVerticalPosition = 0.61
-    public var physicalMoonScale = true // one scale for bodies and separation; fit the entire scene
-    public var moonRadius = 0.043 // legacy, actual lunar size follows Earth
-    public var moonDriftAmplitude = 0.008 // fraction of viewport height, two-hour cycle
     public var starBrightness = 0.055
-    public var milkyWayBrightness = 0.0
+    public var milkyWayBrightness = 0.22 // restrained photographic background
     public var atmosphereIntensity = 0.58
     public var nightLightsIntensity = 2.2
     public var clockScale = 1.0
     public var cityLabelScale = 1.0
-    public var preferredFramesPerSecond = 30
-    public var maximumDrawableDimension = 2560.0
+    public var preferredFramesPerSecond = 1 // maximum battery saving; clocks and astronomy remain current each second
+    public var maximumDrawableDimension = 5120.0 // native 5K output; smaller displays keep their native drawable size
     public init() {}
 }
 

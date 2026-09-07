@@ -64,6 +64,9 @@ final class TerraCoreTests: XCTestCase {
         let evening = SolarPositionCalculator.position(at: date("2026-06-21T18:00:00Z"))
         XCTAssertEqual(evening.longitude,-90,accuracy: 1)
         XCTAssertEqual(simd_length(evening.direction),1,accuracy: 1e-12)
+        let madrid = CitiesConfiguration.cities[0]
+        XCTAssertTrue(CityClockState(city: madrid,date: date("2026-06-21T12:00:00Z")).isDaylight)
+        XCTAssertTrue(!CityClockState(city: madrid,date: date("2026-06-21T00:00:00Z")).isDaylight)
         // Camera rotation must not change whether Madrid is illuminated.
         let normal = CitiesConfiguration.cities[0].position
         for longitude in stride(from: -180.0,through: 180.0,by: 30) {
@@ -111,23 +114,31 @@ final class TerraCoreTests: XCTestCase {
         XCTAssertEqual(a.distanceKilometers,b.distanceKilometers,accuracy: 1e-6)
         XCTAssertTrue(abs(a.altitudeDegrees-b.altitudeDegrees)>10)
         XCTAssertTrue(simd_length(a.lightDirection-b.lightDirection)>0.1)
+
+        // NASA/JPL Horizons DE441, topocentric observer at Madrid,
+        // 2026-09-07 12:00 UTC: azimuth, airless elevation, illuminated disc and range.
+        let jpl = LunarAppearanceCalculator.appearance(at: date("2026-09-07T12:00:00Z"),observer: .madrid)
+        XCTAssertEqual(jpl.azimuthDegrees,258.269192,accuracy: 0.08)
+        XCTAssertEqual(jpl.altitudeDegrees,49.578733,accuracy: 0.08)
+        XCTAssertEqual(jpl.illuminatedFraction,0.1677126,accuracy: 0.0015)
+        XCTAssertEqual(jpl.observerDistanceKilometers,0.00243001818327*149597870.7,accuracy: 80)
     }
-    func testPhysicalLayoutAndHorizon() {
+    func testReadablePhysicalBodyScaleAndHorizon() {
         for place in [ObserverLocation.madrid,.singapore] {
             let camera = CameraBasis(longitude: place.longitude,latitude: place.latitude)
             var above = 0, below = 0
             for hour in 0..<24 {
                 let moon = LunarAppearanceCalculator.appearance(at: date(String(format:"2026-09-06T%02d:00:00Z",hour)),observer: place)
-                var c = SceneConfiguration(); c.physicalMoonScale = true
+                let c = SceneConfiguration()
                 let layout = EarthMoonLayout.calculate(width: 1440,height: 900,basis: camera,lunar: moon,configuration: c)
                 XCTAssertEqual(layout.moonRadius/layout.earthRadius,1737.4/6371,accuracy: 1e-10)
+                XCTAssertEqual(layout.earthRadius,315,accuracy: 1e-10)
                 if moon.altitudeDegrees <= 0 {
                     below += 1; XCTAssertEqual(layout.moonOpacity,0)
                 } else {
                     above += 1
-                    let projected = camera.project(moon.earthFixedPosition)
-                    XCTAssertEqual((layout.moonCenter.x-720)/layout.earthRadius,projected.x,accuracy: 1e-9)
-                    XCTAssertEqual((layout.moonCenter.y-387)/layout.earthRadius,projected.y,accuracy: 1e-9)
+                    let separation = simd_length(layout.moonCenter-SIMD2(720,387))/layout.earthRadius
+                    XCTAssertEqual(separation,1.65*moon.distanceKilometers/384400,accuracy: 1e-9)
                     XCTAssertTrue(layout.moonCenter.x-layout.moonRadius>=0)
                     XCTAssertTrue(layout.moonCenter.x+layout.moonRadius<=1440)
                     XCTAssertTrue(layout.moonCenter.y-layout.moonRadius>=0)
@@ -138,6 +149,11 @@ final class TerraCoreTests: XCTestCase {
         }
     }
     func testIPResponseValidation() {
+        let configuration = SceneConfiguration()
+        XCTAssertTrue(!configuration.automaticIPLocation)
+        XCTAssertEqual(configuration.maximumDrawableDimension,5120)
+        XCTAssertEqual(configuration.preferredFramesPerSecond,1)
+        XCTAssertEqual(configuration.milkyWayBrightness,0.22,accuracy: 1e-12)
         let good = #"{"success":true,"city":"Singapore","latitude":1.35,"longitude":103.8,"timezone":{"id":"Asia/Singapore"}}"#
         do { let place = try LocationResponseParser.parse(Data(good.utf8)); XCTAssertEqual(place.name,"Singapore"); XCTAssertTrue(place.isValid) }
         catch { XCTAssertTrue(false) }
@@ -151,12 +167,63 @@ final class TerraCoreTests: XCTestCase {
         XCTAssertEqual(CitiesConfiguration.including(observer: .madrid).count,3)
         let tokyo = ObserverLocation(name: "Tokyo",latitude: 35.6762,longitude: 139.6503,timeZoneIdentifier: "Asia/Tokyo")
         let cities = CitiesConfiguration.including(observer: tokyo)
-        XCTAssertEqual(cities.count,4); XCTAssertEqual(cities[0].name,"Tokyo")
+        XCTAssertEqual(cities.count,4); XCTAssertEqual(cities[0].timeZoneIdentifier,"Asia/Tokyo")
+        let lisbon = City(name: "Lisbon",latitude: 38.7223,longitude: -9.1393,timeZoneIdentifier: "Europe/Lisbon")
+        let extended = CitiesConfiguration.including(observer: .madrid,additional: [lisbon])
+        XCTAssertEqual(extended.count,4); XCTAssertTrue(extended.contains(where: { $0.name == "Lisbon" }))
         let clock = CityClockState(city: cities[0],date: date("2026-09-06T00:00:00Z"))
         XCTAssertEqual(clock.hour,9)
         let p = CameraBasis(longitude: tokyo.longitude,latitude: tokyo.latitude).project(cities[0].position)
         XCTAssertEqual(p.z,1,accuracy: 1e-10)
-        XCTAssertEqual(CitiesConfiguration.including(observer: .singapore)[0].name,"Singapore")
+        XCTAssertEqual(CitiesConfiguration.including(observer: .singapore)[0].timeZoneIdentifier,"Asia/Singapore")
+    }
+
+    func testSystemCityCatalog() {
+        let sample = """
+        # system tzdb sample
+        ES\t+4024-00341\tEurope/Madrid\tSpain (mainland)
+        JP\t+353916+1394441\tAsia/Tokyo
+        US\t+404251-0740023\tAmerica/New_York\tEastern (most areas)
+        """
+        let entries = SystemCityCatalog.parse(sample,locale: Locale(identifier: "en_US"))
+        XCTAssertEqual(entries.count,3)
+        let madrid = entries.first { $0.timeZoneIdentifier == "Europe/Madrid" }!
+        XCTAssertEqual(madrid.cityName,"Madrid")
+        XCTAssertEqual(madrid.countryName,"Spain")
+        XCTAssertEqual(madrid.latitude,40.4,accuracy: 1e-10)
+        XCTAssertEqual(madrid.longitude,-3.6833333333,accuracy: 1e-9)
+        let tokyo = entries.first { $0.timeZoneIdentifier == "Asia/Tokyo" }!
+        XCTAssertEqual(tokyo.latitude,35.6544444444,accuracy: 1e-9)
+        XCTAssertEqual(tokyo.longitude,139.7447222222,accuracy: 1e-9)
+        let system = SystemCityCatalog.load(locale: Locale(identifier: "en_US"))
+        XCTAssertTrue(system.count > 300)
+        XCTAssertTrue(system.contains { $0.timeZoneIdentifier == "America/New_York" })
+    }
+
+    func testSystemCityLocalizationAndCustomRemoval() {
+        XCTAssertEqual(SystemCityCatalog.localizedCityName(for: "Europe/Madrid",locale: Locale(identifier: "en_US")),"Madrid")
+        XCTAssertEqual(SystemCityCatalog.localizedCityName(for: "Europe/Madrid",locale: Locale(identifier: "es_ES")),"Madrid")
+        XCTAssertEqual(SystemCityCatalog.localizedCityName(for: "Europe/Madrid",locale: Locale(identifier: "ru_RU")),"Мадрид")
+        XCTAssertEqual(SystemCityCatalog.localizedCityName(for: "Europe/Madrid",locale: Locale(identifier: "zh_CN")),"马德里")
+        let london = City(name: "London",latitude: 51.5074,longitude: -0.1278,timeZoneIdentifier: "Europe/London")
+        let tokyo = City(name: "Tokyo",latitude: 35.6762,longitude: 139.6503,timeZoneIdentifier: "Asia/Tokyo")
+        let updated = CityStore.removing(id: london.id,from: [london,tokyo])
+        XCTAssertEqual(updated?.count,1)
+        XCTAssertEqual(updated?.first?.id,tokyo.id)
+        XCTAssertTrue(CityStore.removing(id: "missing",from: [london,tokyo]) == nil)
+        let russian = SystemCityCatalog.parse("ES\t+4024-00341\tEurope/Madrid\nGB\t+513030-0000731\tEurope/London",
+            locale: Locale(identifier: "ru_RU"))
+        XCTAssertEqual(SystemCityCatalog.matching(russian,query: "мад").first?.timeZoneIdentifier,"Europe/Madrid")
+        XCTAssertEqual(SystemCityCatalog.matching(russian,query: "дри").first?.timeZoneIdentifier,"Europe/Madrid")
+        XCTAssertTrue(SystemCityCatalog.matching(russian,query: "токио").isEmpty)
+        XCTAssertTrue(CitiesConfiguration.matchesObserver(CitiesConfiguration.cities[0],observer: .madrid))
+        let withoutMadrid = CitiesConfiguration.cities.filter { $0.timeZoneIdentifier != "Europe/Madrid" }
+        XCTAssertTrue(!CitiesConfiguration.including(observer: tokyoObserver,selection: withoutMadrid)
+            .contains { $0.timeZoneIdentifier == "Europe/Madrid" })
+    }
+
+    private var tokyoObserver: ObserverLocation {
+        ObserverLocation(name: "Tokyo",latitude: 35.6762,longitude: 139.6503,timeZoneIdentifier: "Asia/Tokyo")
     }
 
 }

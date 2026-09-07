@@ -10,7 +10,7 @@ public final class EarthSceneView: NSView {
     public var rotationMultiplier = 1.0
     public var longitudeOverride: Double?
     public private(set) var observer = ObserverLocation.madrid
-    public private(set) var observerStatus = "Madrid · исходное местоположение"
+    public private(set) var observerStatus = "Madrid · ожидание определения по IP"
     public var onObserverStatusChange: ((String) -> Void)?
     public private(set) var renderingError: String?
     private let metalView: MTKView
@@ -25,6 +25,7 @@ public final class EarthSceneView: NSView {
     private var currentLongitude = ObserverLocation.madrid.longitude
     private var currentLatitude = ObserverLocation.madrid.latitude
     private var locationRequest: Task<Void,Never>?
+    private var selectedCities = CityStore.loadSelection()
     private var lastLocationLookup = -Double.infinity
     private var isRunning = false
 
@@ -40,6 +41,7 @@ public final class EarthSceneView: NSView {
         metalView.autoResizeDrawable = false
         addSubview(metalView)
         addSubview(overlay)
+        overlay.setSelectedCities(selectedCities)
         do {
             guard let device = metalView.device else { throw EarthRenderer.RenderError.unavailable }
             renderer = try EarthRenderer(device: device)
@@ -70,10 +72,12 @@ public final class EarthSceneView: NSView {
         isRunning = true; lastUptime = ProcessInfo.processInfo.systemUptime
         if configuration.automaticIPLocation { refreshLocation() }
         if ownTimer {
-            let timer = Timer(timeInterval: 1/Double(configuration.preferredFramesPerSecond), repeats: true) { [weak self] _ in
+            let interval = 1/Double(configuration.preferredFramesPerSecond)
+            let timer = Timer(timeInterval: interval, repeats: true) { [weak self] _ in
                 // AppKit's run-loop timer and the saver host both render on the main thread.
                 self?.renderFrame()
             }
+            timer.tolerance = interval*0.12
             RunLoop.main.add(timer,forMode: .common); self.timer = timer
         }
         needsLayout = true
@@ -86,12 +90,37 @@ public final class EarthSceneView: NSView {
         locationRequest?.cancel(); locationRequest = nil
         applyObserver(location,status: "\(location.name) · выбрано вручную",animated: animated)
     }
+    @discardableResult public func addCity(_ city: City) -> Bool {
+        guard !CitiesConfiguration.including(observer: observer,selection: selectedCities).contains(where: {
+            simd_length($0.position-city.position) < 0.015
+        }) else { return false }
+        selectedCities.append(city); CityStore.saveSelection(selectedCities); overlay.setSelectedCities(selectedCities)
+        if isRunning { renderFrame() }
+        onCitySelectionChange?()
+        return true
+    }
+    public var removableCities: [City] {
+        selectedCities.filter { !CitiesConfiguration.matchesObserver($0,observer: observer) }
+    }
+    public var onCitySelectionChange: (() -> Void)?
+    @discardableResult public func removeCity(id: String) -> Bool {
+        guard let city = selectedCities.first(where: { $0.id == id }),
+              !CitiesConfiguration.matchesObserver(city,observer: observer),
+              let updated = CityStore.removing(id: id,from: selectedCities) else { return false }
+        selectedCities = updated
+        CityStore.saveSelection(selectedCities)
+        overlay.setSelectedCities(selectedCities)
+        if isRunning { renderFrame() }
+        onCitySelectionChange?()
+        return true
+    }
     private func applyObserver(_ location: ObserverLocation,status: String,animated: Bool) {
         observer = location; observerStatus = status
         configuration.initialLongitude = location.longitude; configuration.cameraLatitude = location.latitude
         rotation = 0; solarDate = .distantPast
         if !animated { currentLongitude = location.longitude; currentLatitude = location.latitude }
         onObserverStatusChange?(observerStatus)
+        onCitySelectionChange?()
     }
     public func refreshLocation(force: Bool = false) {
         guard configuration.automaticIPLocation, locationRequest == nil else { return }
@@ -151,7 +180,7 @@ public final class EarthSceneView: NSView {
         guard window?.isVisible != false, window?.occlusionState.contains(.visible) != false else { return }
         let date = timeline.date(uptime: uptime)
         renderer?.draw(view: metalView,uniforms: uniforms(size: metalView.drawableSize,date: date))
-        overlay.caption = timeline.isPreview ? sceneCaption(date: date,snapshot: false) : nil
+        overlay.caption = nil
         overlay.update(date: date,basis: basis(),configuration: overlayConfiguration(size: bounds.size),observer: observer)
     }
 
@@ -166,7 +195,7 @@ public final class EarthSceneView: NSView {
         let formatter = DateFormatter(); formatter.locale = Locale(identifier: "ru_RU")
         formatter.timeZone = TimeZone(identifier: observer.timeZoneIdentifier); formatter.dateFormat = "d MMM yyyy, HH:mm:ss"
         let mode = snapshot ? "ТЕСТОВЫЙ КАДР" : (timeline.rate == 1 ? "ТЕКУЩЕЕ ВРЕМЯ" : "УСКОРЕННОЕ ВРЕМЯ")
-        let scale = configuration.physicalMoonScale ? "Единый масштаб размеров и расстояния" : "Расстояние сжато · размеры пропорциональны"
+        let scale = "Размеры тел пропорциональны · расстояние показано обзорно"
         let moon = lunar.altitudeDegrees > 0 ? String(format: "Луна %.0f км · над горизонтом %.1f°",lunar.distanceKilometers,lunar.altitudeDegrees) : "Луна под горизонтом"
         return "\(mode) · \(observer.name) · \(formatter.string(from: date))\n\(scale) · \(moon)"
     }
