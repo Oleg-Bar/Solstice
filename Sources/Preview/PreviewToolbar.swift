@@ -1,6 +1,7 @@
 import AppKit
 
 final class PreviewToolbar: NSView {
+    static let preferredSize = NSSize(width: 190,height: 36)
     var onAddCity: (() -> Void)?
     var onRemoveCity: (() -> Void)?
     private let addButton = NSButton()

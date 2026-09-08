@@ -22,6 +22,15 @@ public struct EarthMoonLayout {
     }
 }
 
+/// Shared point-based sizing for AppKit overlays. Retina displays increase the
+/// backing pixels, while the clock keeps a readable physical size in points.
+public enum SceneLayoutMetrics {
+    public static func clockRadius(width: Double,height: Double,configuration c: SceneConfiguration) -> Double {
+        let earthRadius = min(width,height)*c.earthDiameter/2
+        return min(46,max(28,earthRadius*0.13))*c.clockScale
+    }
+}
+
 /// The lunar disc as a layout obstacle, in viewport coordinates.
 public struct MoonObstacle: Sendable {
     public let center: SIMD2<Double>

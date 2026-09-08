@@ -33,6 +33,8 @@ func XCTAssertGreaterThanOrEqual(_ a: Double,_ b: Double,file: StaticString = #f
             ("dynamic observer clock",t.testDynamicObserverClock),
             ("macOS system city catalog",t.testSystemCityCatalog),
             ("localized city names / custom removal",t.testSystemCityLocalizationAndCustomRemoval),
+            ("Retina layout across Mac displays",t.testRetinaLayoutAcrossMacDisplays),
+            ("version comparison",t.testVersionComparison),
             ("world city clocks never cover the lunar disc",t.testWorldCityClocksNeverCoverTheLunarDisc)
         ]
         for (name,test) in tests { let before = failures; test(); print("\(failures == before ? "PASS" : "FAIL") \(name)") }

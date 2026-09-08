@@ -21,6 +21,8 @@ final class PreviewDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var scene: EarthSceneView!
     private var toolbar: PreviewToolbar?
     private var toolbarWindow: NSPanel?
+    private var updateButton: NSButton?
+    private var updateWindow: NSPanel?
     private let cityCatalog = SystemCityCatalog.load()
     func applicationDidFinishLaunching(_ notification: Notification) {
         let args = CommandLine.arguments
@@ -43,7 +45,8 @@ final class PreviewDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
                     guard let place = places[args[o+1].lowercased()] else { throw CLIError.invalidObserver }
                     scene.selectObserver(place,animated: false)
                 }
-                try scene.saveSnapshot(to: URL(fileURLWithPath: args[i+1]),size: size,date: date)
+                try scene.saveSnapshot(to: URL(fileURLWithPath: args[i+1]),size: size,date: date,
+                    includeCaption: !args.contains("--clean"),includeUpdateGlyph: args.contains("--show-update"))
                 print("Snapshot saved: \(args[i+1])")
                 NSApp.terminate(nil)
             } catch { fputs("Terra render failed: \(error.localizedDescription)\n",stderr); exit(1) }
@@ -60,15 +63,35 @@ final class PreviewDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             toolbar?.canRemoveCity = !(scene?.removableCities.isEmpty ?? true)
         }
         self.toolbar = toolbar
-        let toolbarWindow = NSPanel(contentRect: NSRect(x: 0,y: 0,width: 190,height: 36),
+        let toolbarWindow = NSPanel(contentRect: NSRect(origin: .zero,size: PreviewToolbar.preferredSize),
             styleMask: [.borderless,.nonactivatingPanel],backing: .buffered,defer: false)
         toolbar.translatesAutoresizingMaskIntoConstraints = true
-        toolbar.frame = toolbarWindow.contentView?.bounds ?? NSRect(x: 0,y: 0,width: 190,height: 36)
+        toolbar.frame = toolbarWindow.contentView?.bounds ?? NSRect(origin: .zero,size: PreviewToolbar.preferredSize)
         toolbar.autoresizingMask = [.width,.height]
         toolbarWindow.contentView = toolbar
         toolbarWindow.isOpaque = false; toolbarWindow.backgroundColor = .clear; toolbarWindow.hasShadow = false
         toolbarWindow.collectionBehavior = [.fullScreenAuxiliary]
         self.toolbarWindow = toolbarWindow
+        let updateButton = NSButton(frame: NSRect(x: 0,y: 0,width: 24,height: 24))
+        updateButton.image = NSImage(systemSymbolName: "arrow.triangle.2.circlepath",accessibilityDescription: "Проверить обновление")
+        updateButton.imagePosition = .imageOnly
+        updateButton.symbolConfiguration = NSImage.SymbolConfiguration(pointSize: 9,weight: .regular)
+        updateButton.controlSize = .small
+        updateButton.isBordered = true
+        if #available(macOS 26.0, *) {
+            updateButton.bezelStyle = .glass
+        } else {
+            updateButton.bezelStyle = .accessoryBarAction
+        }
+        updateButton.contentTintColor = .tertiaryLabelColor
+        updateButton.toolTip = "Проверить обновление"
+        updateButton.target = self; updateButton.action = #selector(checkForUpdates)
+        let updateWindow = NSPanel(contentRect: updateButton.bounds,styleMask: [.borderless,.nonactivatingPanel],
+            backing: .buffered,defer: false)
+        updateWindow.contentView = updateButton
+        updateWindow.isOpaque = false; updateWindow.backgroundColor = .clear; updateWindow.hasShadow = false
+        updateWindow.collectionBehavior = [.fullScreenAuxiliary]
+        self.updateButton = updateButton; self.updateWindow = updateWindow
         window.collectionBehavior = [.fullScreenPrimary]; window.center()
         let menu = NSMenu()
         let appItem = NSMenuItem(); let appMenu = NSMenu()
@@ -87,6 +110,7 @@ final class PreviewDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         viewItem.submenu = viewMenu; menu.addItem(viewItem); NSApp.mainMenu = menu
         window.makeKeyAndOrderFront(nil)
         window.addChildWindow(toolbarWindow,ordered: .above)
+        window.addChildWindow(updateWindow,ordered: .above)
         positionToolbar()
         NSApp.activate(ignoringOtherApps: true); scene.start()
         if !args.contains("--no-ip"), !args.contains("--ip"), IPLocationConsentStore.decision == nil {
@@ -149,6 +173,39 @@ final class PreviewDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         alert.messageText = title; alert.informativeText = text
         alert.beginSheetModal(for: window)
     }
+    @objc private func checkForUpdates() {
+        guard updateButton?.isEnabled == true else { return }
+        updateButton?.isEnabled = false
+        let currentVersion = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "1.06"
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            defer { self.updateButton?.isEnabled = true }
+            do {
+                let release = try await UpdateChecker.latestRelease()
+                let alert = NSAlert(); alert.alertStyle = .informational
+                if AppVersion.isNewer(release.tagName,than: currentVersion) {
+                    alert.messageText = "Доступна новая версия \(release.tagName)"
+                    alert.informativeText = "Установлена Solstice \(currentVersion). Откройте страницу обновления для загрузки новой версии."
+                    alert.addButton(withTitle: "Открыть обновление")
+                    alert.addButton(withTitle: "Позже")
+                    alert.beginSheetModal(for: self.window) { response in
+                        if response == .alertFirstButtonReturn { NSWorkspace.shared.open(release.pageURL) }
+                    }
+                } else {
+                    alert.messageText = "Установлена актуальная версия"
+                    alert.informativeText = "Solstice \(currentVersion) — обновлений пока нет."
+                    alert.addButton(withTitle: "Готово")
+                    alert.beginSheetModal(for: self.window) { _ in }
+                }
+            } catch {
+                let alert = NSAlert(); alert.alertStyle = .informational
+                alert.messageText = "Не удалось проверить обновление"
+                alert.informativeText = (error as? LocalizedError)?.errorDescription ?? "Проверьте подключение к интернету и попробуйте позже."
+                alert.addButton(withTitle: "Готово")
+                alert.beginSheetModal(for: self.window) { _ in }
+            }
+        }
+    }
     @objc private func showLocationConsent() {
         let alert = NSAlert()
         alert.messageText = "Определять текущий город по IP?"
@@ -168,12 +225,23 @@ final class PreviewDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         guard let toolbarWindow, let contentView = window.contentView else { return }
         let inWindow = contentView.convert(NSPoint(x: 58,y: 54),to: nil)
         toolbarWindow.setFrameOrigin(window.convertPoint(toScreen: inWindow))
+        if let updateWindow {
+            let textStyle: [NSAttributedString.Key:Any] = [
+                .font: NSFont.systemFont(ofSize: 8,weight: .regular),
+                .kern: 8*0.035
+            ]
+            let creditWidth = ("created by Oleg Bardakov" as NSString).size(withAttributes: textStyle).width
+            let x = contentView.bounds.width-14-creditWidth-7-updateWindow.frame.width
+            let updateInWindow = contentView.convert(NSPoint(x: x,y: 2),to: nil)
+            updateWindow.setFrameOrigin(window.convertPoint(toScreen: updateInWindow))
+        }
     }
     func windowDidMove(_ notification: Notification) { positionToolbar() }
     func windowDidResize(_ notification: Notification) { positionToolbar() }
     func windowWillClose(_ notification: Notification) {
         scene.stop()
         if let toolbarWindow { window.removeChildWindow(toolbarWindow); toolbarWindow.close() }
+        if let updateWindow { window.removeChildWindow(updateWindow); updateWindow.close() }
     }
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { true }
     enum CLIError: Error { case invalidDate, invalidObserver }

@@ -250,6 +250,43 @@ final class TerraCoreTests: XCTestCase {
         ObserverLocation(name: "Tokyo",latitude: 35.6762,longitude: 139.6503,timeZoneIdentifier: "Asia/Tokyo")
     }
 
+    func testRetinaLayoutAcrossMacDisplays() {
+        let configuration = SceneConfiguration()
+        let lunar = LunarAppearanceCalculator.appearance(
+            at: ISO8601DateFormatter().date(from: "2026-09-08T08:00:00Z")!,observer: .madrid)
+        let basis = CameraBasis(longitude: configuration.initialLongitude,latitude: configuration.cameraLatitude)
+        // Native Retina pixels and their exact 2x AppKit point viewports.
+        let displays: [(String,Double,Double)] = [
+            ("MacBook 13-inch M1",2560,1600),
+            ("MacBook Pro 14-inch",3024,1964),
+            ("MacBook Pro 16-inch",3456,2234),
+            ("4K Retina monitor",3840,2160),
+            ("iMac 4.5K",4480,2520),
+            ("5K Retina monitor",5120,2880)
+        ]
+        var baselineClockRadius = 0.0
+        for (index,display) in displays.enumerated() {
+            let width = display.1/2, height = display.2/2
+            let layout = EarthMoonLayout.calculate(width: width,height: height,basis: basis,lunar: lunar,configuration: configuration)
+            let clockRadius = SceneLayoutMetrics.clockRadius(width: width,height: height,configuration: configuration)
+            if index == 0 { baselineClockRadius = clockRadius }
+            XCTAssertEqual(layout.moonRadius/layout.earthRadius,EarthMoonLayout.radiusRatio,accuracy: 1e-12)
+            XCTAssertEqual(layout.earthRadius,min(width,height)*configuration.earthDiameter/2,accuracy: 1e-12)
+            XCTAssertTrue(clockRadius >= baselineClockRadius)
+            XCTAssertTrue(clockRadius*4 >= 140) // diameter at 2x Retina backing scale
+            XCTAssertTrue(layout.moonCenter.x+layout.moonRadius <= width)
+            XCTAssertTrue(layout.moonCenter.y-layout.moonRadius >= 0)
+            XCTAssertTrue(layout.moonCenter.y+layout.moonRadius <= height)
+        }
+    }
+
+    func testVersionComparison() {
+        XCTAssertTrue(AppVersion.isNewer("v1.06",than: "1.05"))
+        XCTAssertTrue(AppVersion.isNewer("2.0",than: "1.99"))
+        XCTAssertTrue(!AppVersion.isNewer("1.06",than: "1.06"))
+        XCTAssertTrue(!AppVersion.isNewer("1.05.9",than: "1.06"))
+    }
+
     /// Every catalogue city on the rear hemisphere keeps its clock disc clear of the lunar
     /// disc, for every camera bearing and every hour the Moon is drawn. The same resolver
     /// the overlay calls is exercised here, so the invariant cannot drift from the drawing.
@@ -271,7 +308,8 @@ final class TerraCoreTests: XCTestCase {
                     guard let moon = layout.obstacle else { continue }
                     let earthCenter = SIMD2(size.x*0.5,size.y*configuration.earthVerticalPosition)
                     let earthRadius = layout.earthRadius
-                    let clockRadius = min(46,max(28,earthRadius*0.13))*configuration.clockScale
+                    let clockRadius = SceneLayoutMetrics.clockRadius(
+                        width: size.x,height: size.y,configuration: configuration)
                     let envelope = SIMD2(clockRadius*3.7,clockRadius*3.6*configuration.cityLabelScale)
                     let hiddenDistance = earthRadius+clockRadius*3.5+20
                     for entry in catalog {

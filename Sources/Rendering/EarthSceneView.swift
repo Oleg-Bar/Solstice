@@ -204,16 +204,21 @@ public final class EarthSceneView: NSView {
         return "\(mode) · \(observer.name) · \(formatter.string(from: date))\n\(scale) · \(moon)"
     }
 
-    public func saveSnapshot(to url: URL, size: CGSize, date: Date) throws {
+    public func saveSnapshot(to url: URL, size: CGSize, date: Date, backingScaleFactor: CGFloat = 2,
+        includeCaption: Bool = true,includeUpdateGlyph: Bool = false) throws {
         guard let renderer else {
             throw NSError(domain: "Terra",code: 2,userInfo: [NSLocalizedDescriptionKey: renderingError ?? "Metal недоступен"])
         }
         let rep = try renderer.snapshot(uniforms: uniforms(size: size,date: date))
-        guard let context = NSGraphicsContext(bitmapImageRep: rep) else { throw EarthRenderer.RenderError.unavailable }
+        guard backingScaleFactor > 0,
+              let context = NSGraphicsContext(bitmapImageRep: rep) else { throw EarthRenderer.RenderError.unavailable }
+        let logicalSize = CGSize(width: size.width/backingScaleFactor,height: size.height/backingScaleFactor)
         NSGraphicsContext.saveGraphicsState(); NSGraphicsContext.current = context
-        overlay.caption = sceneCaption(date: date,snapshot: true)
-        overlay.frame = NSRect(origin: .zero,size: size)
-        overlay.update(date: date,basis: basis(),configuration: overlayConfiguration(size: size),observer: observer)
+        context.cgContext.scaleBy(x: backingScaleFactor,y: backingScaleFactor)
+        overlay.caption = includeCaption ? sceneCaption(date: date,snapshot: true) : nil
+        overlay.showsUpdateGlyph = includeUpdateGlyph
+        overlay.frame = NSRect(origin: .zero,size: logicalSize)
+        overlay.update(date: date,basis: basis(),configuration: overlayConfiguration(size: logicalSize),observer: observer)
         overlay.draw(overlay.bounds)
         NSGraphicsContext.restoreGraphicsState()
         guard let data = rep.representation(using: .png,properties: [:]) else { throw EarthRenderer.RenderError.unavailable }

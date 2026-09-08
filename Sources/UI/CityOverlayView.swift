@@ -5,6 +5,7 @@ import TerraCore
 
 final class CityOverlayView: NSView {
     var caption: String?
+    var showsUpdateGlyph = false
     /// Lunar disc in this view's coordinate space. No city clock may cover it.
     var moonObstacle: MoonObstacle?
     private var configuration = SceneConfiguration()
@@ -46,7 +47,8 @@ final class CityOverlayView: NSView {
             (caption as NSString).draw(in: CGRect(x: 20,y: 18,width: bounds.width-40,height: 32),withAttributes: style)
         }
         if configuration.milkyWayBrightness > 0 {
-            drawRightAligned("created by Oleg Bardakov.",y: 10,size: 8,weight: .regular,alpha: 0.30)
+            if showsUpdateGlyph { drawUpdateGlyph() }
+            drawRightAligned("created by Oleg Bardakov",y: 10,size: 8,weight: .regular,alpha: 0.30)
         }
         let cities = self.cities, c = configuration
         let now = ProcessInfo.processInfo.systemUptime
@@ -55,7 +57,8 @@ final class CityOverlayView: NSView {
         if previousSize != bounds.size { previousCenters.removeAll(); previousSize = bounds.size }
         let smaller = min(bounds.width,bounds.height), earthRadius = smaller*c.earthDiameter/2
         let earthCenter = CGPoint(x: bounds.midX,y: bounds.height*c.earthVerticalPosition)
-        let baseRadius = min(46,max(28,earthRadius*0.13))*c.clockScale
+        let baseRadius = CGFloat(SceneLayoutMetrics.clockRadius(
+            width: Double(bounds.width),height: Double(bounds.height),configuration: c))
         // Every clock uses the same diameter as the foreground observer clock.
         let hiddenRadius = baseRadius
         var occupied: [CGRect] = []
@@ -173,6 +176,47 @@ final class CityOverlayView: NSView {
         ]
         let width = (value as NSString).size(withAttributes: style).width
         (value as NSString).draw(at: CGPoint(x: bounds.width-width-14,y: y),withAttributes: style)
+    }
+
+    private func drawUpdateGlyph() {
+        guard let cg = NSGraphicsContext.current?.cgContext else { return }
+        let textStyle: [NSAttributedString.Key:Any] = [
+            .font: NSFont.systemFont(ofSize: 8,weight: .regular),
+            .kern: 8*0.035
+        ]
+        let creditWidth = ("created by Oleg Bardakov" as NSString).size(withAttributes: textStyle).width
+        let rect = CGRect(x: bounds.width-14-creditWidth-7-24,y: 2,width: 24,height: 24)
+        let path = CGPath(roundedRect: rect,cornerWidth: 7.5,cornerHeight: 7.5,transform: nil)
+        cg.saveGState()
+        cg.setShadow(offset: CGSize(width: 0,height: -1),blur: 5,
+            color: NSColor.black.withAlphaComponent(0.35).cgColor)
+        cg.setFillColor(NSColor.black.withAlphaComponent(0.22).cgColor)
+        cg.addPath(path); cg.fillPath()
+        cg.setShadow(offset: .zero,blur: 0,color: nil)
+        cg.saveGState(); cg.addPath(path); cg.clip()
+        let colors = [NSColor.white.withAlphaComponent(0.10).cgColor,
+            NSColor.white.withAlphaComponent(0.01).cgColor] as CFArray
+        if let gradient = CGGradient(colorsSpace: CGColorSpaceCreateDeviceRGB(),colors: colors,locations: [0,1]) {
+            cg.drawLinearGradient(gradient,start: CGPoint(x: rect.midX,y: rect.maxY),
+                end: CGPoint(x: rect.midX,y: rect.midY),options: [])
+        }
+        cg.restoreGState()
+        cg.setStrokeColor(NSColor.white.withAlphaComponent(0.13).cgColor)
+        cg.setLineWidth(0.55); cg.addPath(path); cg.strokePath()
+        cg.setStrokeColor(NSColor.white.withAlphaComponent(0.48).cgColor)
+        cg.setLineWidth(0.9); cg.setLineCap(.round); cg.setLineJoin(.round)
+        let center = CGPoint(x: rect.midX,y: rect.midY)
+        cg.addArc(center: center,radius: 4.15,startAngle: -.pi*0.18,endAngle: .pi*0.94,clockwise: false)
+        cg.strokePath()
+        cg.addArc(center: center,radius: 4.15,startAngle: .pi*0.82,endAngle: .pi*1.94,clockwise: false)
+        cg.strokePath()
+        let upperTip = CGPoint(x: center.x+4.05,y: center.y+1.1)
+        cg.move(to: CGPoint(x: upperTip.x-2.5,y: upperTip.y+0.4)); cg.addLine(to: upperTip)
+        cg.addLine(to: CGPoint(x: upperTip.x-0.4,y: upperTip.y+2.5)); cg.strokePath()
+        let lowerTip = CGPoint(x: center.x-4.05,y: center.y-1.1)
+        cg.move(to: CGPoint(x: lowerTip.x+2.5,y: lowerTip.y-0.4)); cg.addLine(to: lowerTip)
+        cg.addLine(to: CGPoint(x: lowerTip.x+0.4,y: lowerTip.y-2.5)); cg.strokePath()
+        cg.restoreGState()
     }
 
 }
