@@ -176,7 +176,7 @@ final class PreviewDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     @objc private func checkForUpdates() {
         guard updateButton?.isEnabled == true else { return }
         updateButton?.isEnabled = false
-        let currentVersion = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "1.06"
+        let currentVersion = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "1.07"
         Task { @MainActor [weak self] in
             guard let self else { return }
             defer { self.updateButton?.isEnabled = true }

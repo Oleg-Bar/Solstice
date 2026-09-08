@@ -32,7 +32,7 @@ enum UpdateChecker {
         let url = URL(string: "https://api.github.com/repos/Oleg-Bar/Solstice/releases/latest")!
         var request = URLRequest(url: url)
         request.setValue("application/vnd.github+json",forHTTPHeaderField: "Accept")
-        request.setValue("Solstice/1.06",forHTTPHeaderField: "User-Agent")
+        request.setValue("Solstice/1.07",forHTTPHeaderField: "User-Agent")
         request.timeoutInterval = 12
         let configuration = URLSessionConfiguration.ephemeral
         configuration.requestCachePolicy = .reloadIgnoringLocalCacheData
