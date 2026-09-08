@@ -53,10 +53,12 @@ public enum LocationResponseParser {
 /// One lookup shared by every display in a host process. No location is written to disk.
 public actor IPLocationResolver {
     public static let shared = IPLocationResolver()
+    public nonisolated static let refreshInterval: TimeInterval = 12 * 60 * 60
     private var cached: (Date,ObserverLocation)?
     private var inFlight: Task<ObserverLocation,Error>?
     public func resolve(force: Bool = false) async throws -> ObserverLocation {
-        if !force, let (date,location) = cached, Date().timeIntervalSince(date) < 120 { return location }
+        if !force, let (date,location) = cached,
+           Date().timeIntervalSince(date) < Self.refreshInterval { return location }
         if let task = inFlight { return try await task.value }
         let task = Task<ObserverLocation,Error> {
             let configuration = URLSessionConfiguration.ephemeral

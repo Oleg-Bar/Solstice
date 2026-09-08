@@ -175,7 +175,8 @@ public final class EarthSceneView: NSView {
         let easing = 1-exp(-delta/0.9)
         currentLongitude += SolarPositionCalculator.normalizedLongitude(configuration.initialLongitude-currentLongitude)*easing
         currentLatitude += (configuration.cameraLatitude-currentLatitude)*easing
-        if configuration.automaticIPLocation, uptime-lastLocationLookup >= 120 { refreshLocation(force: true) }
+        if configuration.automaticIPLocation,
+           uptime-lastLocationLookup >= IPLocationResolver.refreshInterval { refreshLocation() }
         rotation = (rotation + delta*configuration.rotationDegreesPerSecond*rotationMultiplier).truncatingRemainder(dividingBy: 360)
         guard window?.isVisible != false, window?.occlusionState.contains(.visible) != false else { return }
         let date = timeline.date(uptime: uptime)

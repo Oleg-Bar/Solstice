@@ -23,8 +23,8 @@ cat > "$app/Contents/Info.plist" <<'PLIST'
 <key>CFBundleName</key><string>Terra Preview</string>
 <key>CFBundleExecutable</key><string>TerraPreview</string>
 <key>CFBundlePackageType</key><string>APPL</string>
-<key>CFBundleShortVersionString</key><string>1.02</string>
-<key>CFBundleVersion</key><string>3</string>
+<key>CFBundleShortVersionString</key><string>1.03</string>
+<key>CFBundleVersion</key><string>4</string>
 <key>LSMinimumSystemVersion</key><string>13.0</string>
 <key>NSHighResolutionCapable</key><true/>
 <key>NSSupportsAutomaticTermination</key><false/>
@@ -38,15 +38,27 @@ cat > "$saver/Contents/Info.plist" <<'PLIST'
 <key>CFBundleName</key><string>Terra</string>
 <key>CFBundleExecutable</key><string>TerraSaver</string>
 <key>CFBundlePackageType</key><string>BNDL</string>
-<key>CFBundleShortVersionString</key><string>1.02</string>
-<key>CFBundleVersion</key><string>3</string>
+<key>CFBundleShortVersionString</key><string>1.03</string>
+<key>CFBundleVersion</key><string>4</string>
 <key>NSPrincipalClass</key><string>TerraScreenSaverView</string>
 <key>LSMinimumSystemVersion</key><string>13.0</string>
 <key>NSHighResolutionCapable</key><true/>
 </dict></plist>
 PLIST
-codesign --force --sign - "$app"
-codesign --force --sign - "$saver"
+signing_identity="${TERRA_SIGN_IDENTITY:-}"
+if [[ -z "$signing_identity" ]]; then
+    signing_identity="$(security find-identity -v -p codesigning 2>/dev/null \
+        | sed -n 's/.*"\(Developer ID Application:.*\)"/\1/p' | head -n 1)"
+fi
+if [[ -n "$signing_identity" ]]; then
+    sign_options=(--force --sign "$signing_identity" --options runtime --timestamp)
+    printf 'Signing with Developer ID: %s\n' "$signing_identity"
+else
+    sign_options=(--force --sign - --options runtime --timestamp=none)
+    printf 'Warning: no Developer ID certificate found; using a local ad-hoc signature with Hardened Runtime.\n' >&2
+fi
+codesign "${sign_options[@]}" "$app"
+codesign "${sign_options[@]}" "$saver"
 codesign --verify --strict "$app"
 codesign --verify --strict "$saver"
 printf 'Built and signed locally:\n  %s\n  %s\n' "$app" "$saver"

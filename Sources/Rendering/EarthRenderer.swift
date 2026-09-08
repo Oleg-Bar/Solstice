@@ -1,5 +1,4 @@
 import MetalKit
-import ImageIO
 #if SWIFT_PACKAGE
 import TerraCore
 #endif
@@ -17,10 +16,48 @@ struct SceneUniforms {
 }
 
 final class EarthRenderer {
+    private final class SharedResources {
+        let pipeline: MTLRenderPipelineState
+        let textures: [MTLTexture]
+
+        init(device: MTLDevice) throws {
+            let source = try String(contentsOf: SceneAssets.resourceURL("Scene.metal"), encoding: .utf8)
+            let library = try device.makeLibrary(source: source, options: nil)
+            let descriptor = MTLRenderPipelineDescriptor()
+            descriptor.vertexFunction = library.makeFunction(name: "sceneVertex")
+            descriptor.fragmentFunction = library.makeFunction(name: "sceneFragment")
+            descriptor.colorAttachments[0].pixelFormat = .bgra8Unorm_srgb
+            pipeline = try device.makeRenderPipelineState(descriptor: descriptor)
+
+            let loader = MTKTextureLoader(device: device)
+            textures = try ["earth-day.jpg", "earth-night.jpg", "earth-clouds.jpg", "moon.jpg", "milky-way.jpg"]
+                .enumerated().map { index, name in
+                    let options: [MTKTextureLoader.Option: Any] = [
+                        .SRGB: index != 2,
+                        .generateMipmaps: true,
+                        .textureUsage: NSNumber(value: MTLTextureUsage.shaderRead.rawValue),
+                        .textureStorageMode: NSNumber(value: MTLStorageMode.private.rawValue)
+                    ]
+                    return try loader.newTexture(URL: SceneAssets.resourceURL(name), options: options)
+                }
+        }
+    }
+
+    private static let resourcesLock = NSLock()
+    private static var resourcesByDevice: [UInt64: SharedResources] = [:]
+
+    private static func sharedResources(for device: MTLDevice) throws -> SharedResources {
+        resourcesLock.lock()
+        defer { resourcesLock.unlock() }
+        if let resources = resourcesByDevice[device.registryID] { return resources }
+        let resources = try SharedResources(device: device)
+        resourcesByDevice[device.registryID] = resources
+        return resources
+    }
+
     let device: MTLDevice
     private let queue: MTLCommandQueue
-    private let pipeline: MTLRenderPipelineState
-    private let textures: [MTLTexture]
+    private let resources: SharedResources
     private let framesInFlight = DispatchSemaphore(value: 3)
     var lastError: String?
 
@@ -28,53 +65,15 @@ final class EarthRenderer {
         self.device = device
         guard let queue = device.makeCommandQueue() else { throw RenderError.unavailable }
         self.queue = queue
-        let source = try String(contentsOf: SceneAssets.resourceURL("Scene.metal"), encoding: .utf8)
-        let library = try device.makeLibrary(source: source, options: nil)
-        let descriptor = MTLRenderPipelineDescriptor()
-        descriptor.vertexFunction = library.makeFunction(name: "sceneVertex")
-        descriptor.fragmentFunction = library.makeFunction(name: "sceneFragment")
-        descriptor.colorAttachments[0].pixelFormat = .bgra8Unorm_srgb
-        pipeline = try device.makeRenderPipelineState(descriptor: descriptor)
-        textures = try ["earth-day.jpg", "earth-night.jpg", "earth-clouds.jpg", "moon.jpg", "milky-way.jpg"].enumerated().map { index, name in
-            let url = try SceneAssets.resourceURL(name)
-            // A 4K equirectangular map provides about 2K samples across the visible
-            // hemisphere, matching Terra's ~2K Earth disc on a 5K screen.
-            let textureLimit = index == 3 ? 2048 : 4096
-            guard let source = CGImageSourceCreateWithURL(url as CFURL,nil),
-                  let image = CGImageSourceCreateThumbnailAtIndex(source,0,[
-                    kCGImageSourceCreateThumbnailFromImageAlways: true,
-                    kCGImageSourceThumbnailMaxPixelSize: textureLimit,
-                    kCGImageSourceShouldCacheImmediately: true
-                  ] as CFDictionary) else { throw RenderError.unavailable }
-            guard let context = CGContext(data: nil, width: image.width, height: image.height,
-                bitsPerComponent: 8, bytesPerRow: image.width*4,
-                space: CGColorSpace(name: CGColorSpace.sRGB)!,
-                bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue) else { throw RenderError.unavailable }
-            context.draw(image,in: CGRect(x: 0,y: 0,width: image.width,height: image.height))
-            guard let pixels = context.data else { throw RenderError.unavailable }
-            let textureDescriptor = MTLTextureDescriptor.texture2DDescriptor(
-                pixelFormat: index == 2 ? .rgba8Unorm : .rgba8Unorm_srgb,
-                width: image.width,height: image.height,mipmapped: true)
-            textureDescriptor.storageMode = .shared
-            textureDescriptor.usage = .shaderRead
-            guard let texture = device.makeTexture(descriptor: textureDescriptor),
-                  let command = queue.makeCommandBuffer(), let blit = command.makeBlitCommandEncoder()
-            else { throw RenderError.unavailable }
-            texture.replace(region: MTLRegionMake2D(0,0,image.width,image.height),mipmapLevel: 0,
-                withBytes: pixels,bytesPerRow: image.width*4)
-            blit.generateMipmaps(for: texture); blit.endEncoding()
-            command.commit(); command.waitUntilCompleted()
-            if let error = command.error { throw error }
-            return texture
-        }
+        resources = try Self.sharedResources(for: device)
     }
 
     private func encode(pass: MTLRenderPassDescriptor, buffer: MTLCommandBuffer, uniforms: SceneUniforms) {
         guard let encoder = buffer.makeRenderCommandEncoder(descriptor: pass) else { return }
         var values = uniforms
-        encoder.setRenderPipelineState(pipeline)
+        encoder.setRenderPipelineState(resources.pipeline)
         encoder.setFragmentBytes(&values, length: MemoryLayout<SceneUniforms>.stride, index: 0)
-        for (index, texture) in textures.enumerated() { encoder.setFragmentTexture(texture, index: index) }
+        for (index, texture) in resources.textures.enumerated() { encoder.setFragmentTexture(texture, index: index) }
         encoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: 3)
         encoder.endEncoding()
     }
