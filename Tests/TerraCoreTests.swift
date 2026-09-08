@@ -249,4 +249,61 @@ final class TerraCoreTests: XCTestCase {
         ObserverLocation(name: "Tokyo",latitude: 35.6762,longitude: 139.6503,timeZoneIdentifier: "Asia/Tokyo")
     }
 
+    /// Every catalogue city on the rear hemisphere keeps its clock disc clear of the lunar
+    /// disc, for every camera bearing and every hour the Moon is drawn. The same resolver
+    /// the overlay calls is exercised here, so the invariant cannot drift from the drawing.
+    func testWorldCityClocksNeverCoverTheLunarDisc() {
+        let size = SIMD2(1440.0,900.0)
+        var configuration = SceneConfiguration()
+        configuration.moonEnabled = true
+        let catalog = SystemCityCatalog.load(locale: Locale(identifier: "en_US"))
+        XCTAssertGreaterThanOrEqual(Double(catalog.count),300)
+        var worstHidden = Double.infinity, worstFront = Double.infinity
+        var worstHiddenCity = "", worstFrontCity = "", checked = 0
+        for observer in [ObserverLocation.madrid,.singapore,.newYork] {
+            for hour in stride(from: 0,through: 22,by: 2) {
+                let date = ISO8601DateFormatter().date(from: String(format: "2026-09-09T%02d:00:00Z",hour))!
+                let lunar = LunarAppearanceCalculator.appearance(at: date,observer: observer)
+                for longitude in stride(from: 0.0,to: 360.0,by: 10.0) {
+                    let basis = CameraBasis(longitude: longitude,latitude: observer.latitude)
+                    let layout = EarthMoonLayout.calculate(width: size.x,height: size.y,basis: basis,lunar: lunar,configuration: configuration)
+                    guard let moon = layout.obstacle else { continue }
+                    let earthCenter = SIMD2(size.x*0.5,size.y*configuration.earthVerticalPosition)
+                    let earthRadius = layout.earthRadius
+                    let clockRadius = min(46,max(28,earthRadius*0.13))*configuration.clockScale
+                    let envelope = SIMD2(clockRadius*3.7,clockRadius*3.6*configuration.cityLabelScale)
+                    let hiddenDistance = earthRadius+clockRadius*3.5+20
+                    for entry in catalog {
+                        let projected = basis.project(entry.city.position)
+                        let opacity = GlobeGeometry.surfaceOpacity(depth: projected.z)
+                        let bearing = SIMD2(projected.x,projected.y)
+                        let bearingLength = simd_length(bearing)
+                        let direction = bearingLength > 0.001 ? bearing/bearingLength : SIMD2(-1,0)
+                        if opacity < 0.99 {
+                            let center = ClockPlacement.resolve(earthCenter+direction*hiddenDistance,envelope: envelope,
+                                radius: clockRadius,moon: moon,
+                                limits: (SIMD2(clockRadius*2.5,clockRadius*3.2),SIMD2(size.x-clockRadius*2.5,size.y-clockRadius*2)))
+                            let gap = simd_length(center-moon.center)-moon.radius-clockRadius
+                            if gap < worstHidden { worstHidden = gap; worstHiddenCity = entry.displayName }
+                            checked += 1
+                        }
+                        if opacity > 0.01 {
+                            let center = ClockPlacement.resolve(earthCenter+bearing*earthRadius,envelope: envelope,
+                                radius: clockRadius,moon: moon,
+                                limits: (SIMD2(clockRadius*2,clockRadius*3),SIMD2(size.x-clockRadius*2,size.y-clockRadius*1.2)))
+                            let gap = simd_length(center-moon.center)-moon.radius-clockRadius
+                            if gap < worstFront { worstFront = gap; worstFrontCity = entry.displayName }
+                            checked += 1
+                        }
+                    }
+                }
+            }
+        }
+        XCTAssertGreaterThanOrEqual(Double(checked),10000)
+        XCTAssertGreaterThanOrEqual(worstHidden,0)
+        XCTAssertGreaterThanOrEqual(worstFront,0)
+        XCTAssertEqual(worstHidden >= 0 ? "ok" : worstHiddenCity,"ok")
+        XCTAssertEqual(worstFront >= 0 ? "ok" : worstFrontCity,"ok")
+    }
+
 }

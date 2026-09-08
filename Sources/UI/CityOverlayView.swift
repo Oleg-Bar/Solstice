@@ -5,6 +5,8 @@ import TerraCore
 
 final class CityOverlayView: NSView {
     var caption: String?
+    /// Lunar disc in this view's coordinate space. No city clock may cover it.
+    var moonObstacle: MoonObstacle?
     private var configuration = SceneConfiguration()
     private var basis = CameraBasis(longitude: 15,latitude: 15)
     private var cities = CitiesConfiguration.cities
@@ -57,6 +59,12 @@ final class CityOverlayView: NSView {
         // Every clock uses the same diameter as the foreground observer clock.
         let hiddenRadius = baseRadius
         var occupied: [CGRect] = []
+        // The Moon is a fixed obstacle, so reserve its disc up front and let the
+        // separation loop below steer clocks around it before the final pass.
+        if let moon = moonObstacle, moon.radius > 0 {
+            occupied.append(CGRect(x: moon.center.x-moon.radius,y: moon.center.y-moon.radius,
+                width: moon.radius*2,height: moon.radius*2))
+        }
         for (index,city) in cities.enumerated() {
             let p = basis.project(city.position)
             let opacity = GlobeGeometry.surfaceOpacity(depth: p.z)
@@ -83,11 +91,14 @@ final class CityOverlayView: NSView {
                 let rect = CGRect(x: center.x-envelope.width/2,y: center.y-radius*2.5,width: envelope.width,height: envelope.height)
                 if occupied.contains(where: { $0.intersects(rect) }) { center.x += (p.x < 0 ? -1 : 1)*radius*3.8 } else { break }
             }
-            center.x = min(bounds.width-radius*2,max(radius*2,center.x))
-            center.y = min(bounds.height-radius*1.2,max(radius*3,center.y))
             if let previous = previousCenters[city.id] {
                 center = CGPoint(x: previous.x+(center.x-previous.x)*easing,y: previous.y+(center.y-previous.y)*easing)
             }
+            // Resolved after the on-screen limits and the easing, so every drawn frame —
+            // including mid-transition ones — keeps the dial clear of the lunar disc.
+            center = resolved(center,envelope: envelope,radius: radius,
+                limits: (SIMD2(Double(radius*2),Double(radius*3)),
+                    SIMD2(Double(bounds.width-radius*2),Double(bounds.height-radius*1.2))))
             previousCenters[city.id] = center
             if opacity > 0.01 {
                 occupied.append(CGRect(x: center.x-envelope.width/2,y: center.y-radius*2.5,width: envelope.width,height: envelope.height))
@@ -102,9 +113,10 @@ final class CityOverlayView: NSView {
             let direction = directionLength > 0.001 ? CGPoint(x: p.x/directionLength,y: p.y/directionLength) : CGPoint(x: -1,y: 0)
             let limb = CGPoint(x: earthCenter.x+direction.x*(earthRadius+3),y: earthCenter.y+direction.y*(earthRadius+3))
             let distance = earthRadius+hiddenRadius*3.5+20
-            var hiddenCenter = CGPoint(x: earthCenter.x+direction.x*distance,y: earthCenter.y+direction.y*distance)
-            hiddenCenter.x = min(bounds.width-hiddenRadius*2.5,max(hiddenRadius*2.5,hiddenCenter.x))
-            hiddenCenter.y = min(bounds.height-hiddenRadius*2,max(hiddenRadius*3.2,hiddenCenter.y))
+            let hiddenCenter = resolved(CGPoint(x: earthCenter.x+direction.x*distance,y: earthCenter.y+direction.y*distance),
+                envelope: CGSize(width: hiddenRadius*3.7,height: hiddenRadius*3.6*c.cityLabelScale),radius: hiddenRadius,
+                limits: (SIMD2(Double(hiddenRadius*2.5),Double(hiddenRadius*3.2)),
+                    SIMD2(Double(bounds.width-hiddenRadius*2.5),Double(bounds.height-hiddenRadius*2))))
             if opacity < 0.99 {
                 // A front-side city points to its exact map coordinate. A rear-side city has no
                 // visible point on the current map, so its indicator truthfully ends at the limb
@@ -114,6 +126,14 @@ final class CityOverlayView: NSView {
                 AnalogClock.draw(center: hiddenCenter,radius: hiddenRadius,city: city,state: state,opacity: 1-opacity,labelScale: c.cityLabelScale)
             }
         }
+    }
+    /// Places a clock through the shared Core resolver, bridging AppKit and SIMD types.
+    private func resolved(_ center: CGPoint,envelope: CGSize,radius: CGFloat,
+        limits: (min: SIMD2<Double>,max: SIMD2<Double>)) -> CGPoint {
+        let placed = ClockPlacement.resolve(SIMD2(Double(center.x),Double(center.y)),
+            envelope: SIMD2(Double(envelope.width),Double(envelope.height)),radius: Double(radius),
+            moon: moonObstacle,limits: limits)
+        return CGPoint(x: placed.x,y: placed.y)
     }
     private func drawGlassArrow(_ cg: CGContext,from center: CGPoint,to tip: CGPoint,radius: Double,opacity: Double,time: Double) {
         let dx = tip.x-center.x, dy = tip.y-center.y, length = hypot(dx,dy)

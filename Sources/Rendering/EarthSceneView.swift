@@ -188,6 +188,9 @@ public final class EarthSceneView: NSView {
         var c = configuration
         let layout = EarthMoonLayout.calculate(width: size.width,height: size.height,basis: basis(),lunar: lunar,configuration: c)
         c.earthDiameter = layout.earthRadius*2/min(size.width,size.height)
+        // Same layout the shader received, already expressed in the overlay's coordinate
+        // space, so city clocks can keep clear of the lunar disc.
+        overlay.moonObstacle = layout.obstacle
         return c
     }
 
