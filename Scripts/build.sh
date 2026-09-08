@@ -23,8 +23,8 @@ cat > "$app/Contents/Info.plist" <<'PLIST'
 <key>CFBundleName</key><string>Terra Preview</string>
 <key>CFBundleExecutable</key><string>TerraPreview</string>
 <key>CFBundlePackageType</key><string>APPL</string>
-<key>CFBundleShortVersionString</key><string>1.01</string>
-<key>CFBundleVersion</key><string>2</string>
+<key>CFBundleShortVersionString</key><string>1.02</string>
+<key>CFBundleVersion</key><string>3</string>
 <key>LSMinimumSystemVersion</key><string>13.0</string>
 <key>NSHighResolutionCapable</key><true/>
 <key>NSSupportsAutomaticTermination</key><false/>
@@ -38,8 +38,8 @@ cat > "$saver/Contents/Info.plist" <<'PLIST'
 <key>CFBundleName</key><string>Terra</string>
 <key>CFBundleExecutable</key><string>TerraSaver</string>
 <key>CFBundlePackageType</key><string>BNDL</string>
-<key>CFBundleShortVersionString</key><string>1.01</string>
-<key>CFBundleVersion</key><string>2</string>
+<key>CFBundleShortVersionString</key><string>1.02</string>
+<key>CFBundleVersion</key><string>3</string>
 <key>NSPrincipalClass</key><string>TerraScreenSaverView</string>
 <key>LSMinimumSystemVersion</key><string>13.0</string>
 <key>NSHighResolutionCapable</key><true/>

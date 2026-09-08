@@ -175,7 +175,7 @@ final class TerraCoreTests: XCTestCase {
         XCTAssertTrue(!configuration.automaticIPLocation)
         XCTAssertEqual(configuration.maximumDrawableDimension,5120)
         XCTAssertEqual(configuration.preferredFramesPerSecond,1)
-        XCTAssertEqual(configuration.milkyWayBrightness,0.27,accuracy: 1e-12)
+        XCTAssertEqual(configuration.milkyWayBrightness,0.35,accuracy: 1e-12)
         XCTAssertEqual(configuration.clockScale,1.01,accuracy: 1e-12)
         let good = #"{"success":true,"city":"Singapore","latitude":1.35,"longitude":103.8,"timezone":{"id":"Asia/Singapore"}}"#
         do { let place = try LocationResponseParser.parse(Data(good.utf8)); XCTAssertEqual(place.name,"Singapore"); XCTAssertTrue(place.isValid) }

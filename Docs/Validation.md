@@ -1,4 +1,4 @@
-# Проверка Solstice 1.01
+# Проверка Solstice 1.02
 
 Дата: **8 сентября 2026**. Среда: **macOS Tahoe 26.6.1 (25G76), arm64, Swift 6.3.3, Apple Command Line Tools**.
 
