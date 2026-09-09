@@ -53,7 +53,7 @@ final class PreviewDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             return
         }
         window = NSWindow(contentRect: scene.frame,styleMask: [.titled,.closable,.miniaturizable,.resizable],backing: .buffered,defer: false)
-        window.title = "Terra Preview"; window.minSize = CGSize(width: 640,height: 420)
+        window.title = "Solstice Preview"; window.minSize = CGSize(width: 640,height: 420)
         window.contentView = scene; window.delegate = self
         let toolbar = PreviewToolbar()
         toolbar.onAddCity = { [weak self] in self?.showAddCity() }
@@ -102,7 +102,7 @@ final class PreviewDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         let locate = appMenu.addItem(withTitle: "Определить город по IP…",action: #selector(showLocationConsent),keyEquivalent: "")
         locate.target = self
         appMenu.addItem(.separator())
-        appMenu.addItem(withTitle: "Завершить Terra Preview",action: #selector(NSApplication.terminate(_:)),keyEquivalent: "q")
+        appMenu.addItem(withTitle: "Завершить Solstice Preview",action: #selector(NSApplication.terminate(_:)),keyEquivalent: "q")
         appItem.submenu = appMenu; menu.addItem(appItem)
         let viewItem = NSMenuItem(); viewItem.title = "Вид"; let viewMenu = NSMenu(title: "Вид")
         let fullscreen = viewMenu.addItem(withTitle: "Полный экран",action: #selector(fullScreen),keyEquivalent: "f"); fullscreen.target = self
@@ -176,7 +176,7 @@ final class PreviewDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     @objc private func checkForUpdates() {
         guard updateButton?.isEnabled == true else { return }
         updateButton?.isEnabled = false
-        let currentVersion = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "1.07"
+        let currentVersion = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "1.08"
         Task { @MainActor [weak self] in
             guard let self else { return }
             defer { self.updateButton?.isEnabled = true }
@@ -209,7 +209,7 @@ final class PreviewDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     @objc private func showLocationConsent() {
         let alert = NSAlert()
         alert.messageText = "Определять текущий город по IP?"
-        alert.informativeText = "Для приблизительного города Terra отправит ваш внешний IP сервису ipwho.is. Точные координаты Mac не передаются. Без разрешения останется резервный город Madrid."
+        alert.informativeText = "Для приблизительного города Solstice отправит ваш внешний IP сервису ipwho.is. Точные координаты Mac не передаются. Без разрешения останется резервный город Madrid."
         alert.addButton(withTitle: "Разрешить")
         alert.addButton(withTitle: "Не сейчас")
         alert.beginSheetModal(for: window) { [weak self] response in

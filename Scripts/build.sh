@@ -20,11 +20,12 @@ cat > "$app/Contents/Info.plist" <<'PLIST'
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0"><dict>
 <key>CFBundleIdentifier</key><string>studio.terra.preview</string>
-<key>CFBundleName</key><string>Terra Preview</string>
+<key>CFBundleName</key><string>Solstice Preview</string>
+<key>CFBundleDisplayName</key><string>Solstice Preview</string>
 <key>CFBundleExecutable</key><string>TerraPreview</string>
 <key>CFBundlePackageType</key><string>APPL</string>
-<key>CFBundleShortVersionString</key><string>1.07</string>
-<key>CFBundleVersion</key><string>8</string>
+<key>CFBundleShortVersionString</key><string>1.08</string>
+<key>CFBundleVersion</key><string>9</string>
 <key>LSMinimumSystemVersion</key><string>13.0</string>
 <key>NSHighResolutionCapable</key><true/>
 <key>NSSupportsAutomaticTermination</key><false/>
@@ -35,11 +36,12 @@ cat > "$saver/Contents/Info.plist" <<'PLIST'
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0"><dict>
 <key>CFBundleIdentifier</key><string>studio.terra.screensaver</string>
-<key>CFBundleName</key><string>Terra</string>
+<key>CFBundleName</key><string>Solstice</string>
+<key>CFBundleDisplayName</key><string>Solstice</string>
 <key>CFBundleExecutable</key><string>TerraSaver</string>
 <key>CFBundlePackageType</key><string>BNDL</string>
-<key>CFBundleShortVersionString</key><string>1.07</string>
-<key>CFBundleVersion</key><string>8</string>
+<key>CFBundleShortVersionString</key><string>1.08</string>
+<key>CFBundleVersion</key><string>9</string>
 <key>NSPrincipalClass</key><string>TerraScreenSaverView</string>
 <key>LSMinimumSystemVersion</key><string>13.0</string>
 <key>NSHighResolutionCapable</key><true/>

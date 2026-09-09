@@ -1,6 +1,6 @@
-# Проверка Solstice 1.07
+# Проверка Solstice 1.08
 
-Дата: **8 сентября 2026**. Среда: **macOS Tahoe 26.6.1 (25G76), arm64, Swift 6.3.3, Apple Command Line Tools**.
+Дата: **9 сентября 2026**. Среда: **macOS Tahoe 26.6.1 (25G76), arm64, Swift 6.3.3, Apple Command Line Tools**.
 
 ## Выполнено
 
@@ -8,6 +8,9 @@
 |---|---|
 | Прямая Release-сборка Swift | Preview.app и Terra.saver собраны |
 | Подписи bundle | ad-hoc; `codesign --verify --strict` прошёл |
+| Установочный DMG | 37 МБ; `hdiutil verify` прошёл, SHA-256 создан рядом с образом |
+| Install Solstice | локализованный интерфейс, Preview и установка для текущего пользователя проверены |
+| Установленный bundle | `~/Library/Screen Savers/Solstice.saver`; подпись и lifecycle-тест прошли |
 | Математические unit tests | 18 тестов, 3436 проверок, 0 ошибок |
 | Metal-шейдер | скомпилирован драйвером, кадры реально отрисованы GPU |
 | Разрешения Retina-снимков | 2560×1600, 3024×1964, 3456×2234, 3840×2160, 4480×2520, 5120×2880 |
@@ -30,6 +33,7 @@ Unit tests проверяют географические оси и шов 180�
 ```bash
 bash Scripts/test.sh
 bash Scripts/build.sh
+bash Scripts/package-dmg.sh
 "Build/products/Terra Preview.app/Contents/MacOS/TerraPreview" \
   --snapshot Docs/Preview.png --date 2026-09-05T16:37:00Z
 "Build/products/Terra Preview.app/Contents/MacOS/TerraPreview" \
@@ -46,7 +50,7 @@ Build/SaverSmoke "$PWD/Build/products/Terra.saver"
 
 ## Ещё не подтверждено
 
-- Установка через System Settings, выбор Terra, реальные idle/lock/unlock и обновление установленного bundle.
+- Выбор Solstice в System Settings, реальные idle/lock/unlock и обновление ранее установленного bundle.
 - Несколько физических дисплеев, fast user switching, длительный sleep/wake.
 - Xcode build/test: полный Xcode отсутствует. Прямая сборка тех же исходников выполнена.
 - Swift Package Manager: локальные интерфейсы PackageDescription разных версий мешают manifest; системные файлы не менялись.

@@ -281,10 +281,10 @@ final class TerraCoreTests: XCTestCase {
     }
 
     func testVersionComparison() {
-        XCTAssertTrue(AppVersion.isNewer("v1.07",than: "1.06"))
+        XCTAssertTrue(AppVersion.isNewer("v1.08",than: "1.07"))
         XCTAssertTrue(AppVersion.isNewer("2.0",than: "1.99"))
-        XCTAssertTrue(!AppVersion.isNewer("1.07",than: "1.07"))
-        XCTAssertTrue(!AppVersion.isNewer("1.06.9",than: "1.07"))
+        XCTAssertTrue(!AppVersion.isNewer("1.08",than: "1.08"))
+        XCTAssertTrue(!AppVersion.isNewer("1.07.9",than: "1.08"))
     }
 
     /// Every catalogue city on the rear hemisphere keeps its clock disc clear of the lunar
