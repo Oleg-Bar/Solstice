@@ -115,7 +115,10 @@ if [[ -n "$signing_identity" ]]; then
     codesign --force --sign "$signing_identity" --timestamp "$output"
     codesign --verify --verbose "$output"
 fi
-shasum -a 256 "$output" > "$output.sha256"
+(
+    cd "$release_dir"
+    shasum -a 256 "$(basename "$output")" > "$(basename "$output").sha256"
+)
 
 rm -f "$rw_image"
 
