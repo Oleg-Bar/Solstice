@@ -19,11 +19,11 @@ def make_background(hero: Image.Image, destination: Path) -> None:
     overlay = Image.new("RGBA", canvas.size, (0, 0, 0, 0))
     draw = ImageDraw.Draw(overlay)
     # A restrained macOS-style glass landing area keeps the installer label readable.
-    draw.rounded_rectangle((36, 142, 278, 418), radius=34,
+    draw.rounded_rectangle((36, 142, 764, 418), radius=34,
                            fill=(240, 246, 255, 46), outline=(255, 255, 255, 62), width=1)
     draw.text((42, 42), "Solstice", font=font(42, rounded=True), fill=(255, 255, 255, 242))
-    draw.text((45, 92), "1.08  •  macOS", font=font(15), fill=(222, 228, 238, 205))
-    draw.text((86, 380), "Double-click to install", font=font(13), fill=(255, 255, 255, 222))
+    draw.text((45, 92), "1.10  •  macOS", font=font(15), fill=(222, 228, 238, 205))
+    draw.text((274, 380), "Drag Solstice to Applications", font=font(13), fill=(255, 255, 255, 222))
     Image.alpha_composite(canvas, overlay).convert("RGB").save(destination, "PNG", optimize=True)
 
 

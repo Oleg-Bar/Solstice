@@ -133,8 +133,17 @@ final class TerraCoreTests: XCTestCase {
         let instant = date("2026-09-06T06:00:00Z")
         let a = LunarAppearanceCalculator.appearance(at: instant,observer: .madrid)
         let b = LunarAppearanceCalculator.appearance(at: instant,observer: .singapore)
+        let c = LunarAppearanceCalculator.appearance(at: instant,observer: .newYork)
         XCTAssertEqual(a.distanceKilometers,b.distanceKilometers,accuracy: 1e-6)
+        XCTAssertEqual(a.distanceKilometers,c.distanceKilometers,accuracy: 1e-6)
+        // The astronomical phase is global at a given instant (apart from tiny
+        // topocentric parallax), while horizon position and apparent orientation
+        // are observer-dependent.
+        XCTAssertEqual(a.illuminatedFraction,b.illuminatedFraction,accuracy: 0.02)
+        XCTAssertEqual(a.illuminatedFraction,c.illuminatedFraction,accuracy: 0.02)
         XCTAssertTrue(abs(a.altitudeDegrees-b.altitudeDegrees)>10)
+        XCTAssertTrue(hypot(a.altitudeDegrees-c.altitudeDegrees,
+            SolarPositionCalculator.normalizedLongitude(a.azimuthDegrees-c.azimuthDegrees))>10)
         XCTAssertTrue(simd_length(a.lightDirection-b.lightDirection)>0.1)
 
         // NASA/JPL Horizons DE441, topocentric observer at Madrid,

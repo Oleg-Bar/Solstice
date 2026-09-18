@@ -24,8 +24,8 @@ cat > "$app/Contents/Info.plist" <<'PLIST'
 <key>CFBundleDisplayName</key><string>Solstice Preview</string>
 <key>CFBundleExecutable</key><string>TerraPreview</string>
 <key>CFBundlePackageType</key><string>APPL</string>
-<key>CFBundleShortVersionString</key><string>1.08</string>
-<key>CFBundleVersion</key><string>9</string>
+<key>CFBundleShortVersionString</key><string>1.10</string>
+<key>CFBundleVersion</key><string>13</string>
 <key>LSMinimumSystemVersion</key><string>13.0</string>
 <key>NSHighResolutionCapable</key><true/>
 <key>NSSupportsAutomaticTermination</key><false/>
@@ -40,8 +40,8 @@ cat > "$saver/Contents/Info.plist" <<'PLIST'
 <key>CFBundleDisplayName</key><string>Solstice</string>
 <key>CFBundleExecutable</key><string>TerraSaver</string>
 <key>CFBundlePackageType</key><string>BNDL</string>
-<key>CFBundleShortVersionString</key><string>1.08</string>
-<key>CFBundleVersion</key><string>9</string>
+<key>CFBundleShortVersionString</key><string>1.10</string>
+<key>CFBundleVersion</key><string>13</string>
 <key>NSPrincipalClass</key><string>TerraScreenSaverView</string>
 <key>LSMinimumSystemVersion</key><string>13.0</string>
 <key>NSHighResolutionCapable</key><true/>

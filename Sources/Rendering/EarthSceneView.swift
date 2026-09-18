@@ -9,6 +9,9 @@ public final class EarthSceneView: NSView {
     public var timeline: SceneTimeline
     public var rotationMultiplier = 1.0
     public var longitudeOverride: Double?
+    /// ScreenSaverView is hosted in a private view-service window whose AppKit
+    /// occlusion state is not reliable even while the saver is on screen.
+    public var rendersWhenOccluded = false
     public private(set) var observer = ObserverLocation.madrid
     public private(set) var observerStatus = "Madrid · ожидание определения по IP"
     public var onObserverStatusChange: ((String) -> Void)?
@@ -178,7 +181,9 @@ public final class EarthSceneView: NSView {
         if configuration.automaticIPLocation,
            uptime-lastLocationLookup >= IPLocationResolver.refreshInterval { refreshLocation() }
         rotation = (rotation + delta*configuration.rotationDegreesPerSecond*rotationMultiplier).truncatingRemainder(dividingBy: 360)
-        guard window?.isVisible != false, window?.occlusionState.contains(.visible) != false else { return }
+        if !rendersWhenOccluded {
+            guard window?.isVisible != false, window?.occlusionState.contains(.visible) != false else { return }
+        }
         let date = timeline.date(uptime: uptime)
         renderer?.draw(view: metalView,uniforms: uniforms(size: metalView.drawableSize,date: date))
         overlay.caption = nil

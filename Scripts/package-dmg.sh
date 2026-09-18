@@ -2,16 +2,17 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-version="1.08"
-build_number="9"
+version="1.10"
+build_number="13"
 product="Solstice"
 release_dir="$PWD/Build/release"
 stage="$release_dir/dmg-root"
-installer="$stage/Install Solstice.app"
+installer="$stage/Solstice.app"
 resources="$installer/Contents/Resources"
 hero="$PWD/Docs/GitHub-Previews/Solstice-Retina-5K.png"
 background="$stage/.background/background.png"
 icon="$release_dir/Solstice.icns"
+thumbnail="$release_dir/Solstice-Thumbnail.png"
 rw_image="$release_dir/Solstice-$version-rw.dmg"
 output="$release_dir/Solstice-$version-macOS-Apple-Silicon.dmg"
 volume_name="Solstice $version"
@@ -24,13 +25,21 @@ fi
 bash Scripts/build.sh
 
 rm -rf "$stage"
-rm -f "$rw_image" "$output" "$output.sha256" "$icon"
+rm -f "$rw_image" "$output" "$output.sha256" "$icon" "$thumbnail"
 mkdir -p "$resources" "$stage/.background"
+
+# The app header is derived from the verified 5K product render. Native `sips`
+# crops only the vertical excess, keeping Earth and the Moon in frame, then
+# creates the exact 1440x600 2x asset without launching another Metal process.
+sips -c 2133 5120 "$hero" --out "$thumbnail" >/dev/null
+sips -z 600 1440 "$thumbnail" >/dev/null
 
 # Customer-facing names are Solstice; internal executable/module names remain stable.
 ditto "Build/products/Terra.saver" "$resources/Solstice.saver"
 ditto "Build/products/Terra Preview.app" "$resources/Solstice Preview.app"
 cp "$hero" "$resources/Hero.png"
+cp "$thumbnail" "$resources/SolsticeThumbnail.png"
+ln -s /Applications "$stage/Applications"
 
 # Finder background and app icon are derived from the actual 5K product image.
 python3 Scripts/create-brand-assets.py "$hero" "$background" "$icon"
@@ -49,9 +58,9 @@ cat > "$installer/Contents/Info.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0"><dict>
-<key>CFBundleIdentifier</key><string>studio.solstice.installer</string>
-<key>CFBundleName</key><string>Install Solstice</string>
-<key>CFBundleDisplayName</key><string>Install Solstice</string>
+<key>CFBundleIdentifier</key><string>studio.solstice.app</string>
+<key>CFBundleName</key><string>Solstice</string>
+<key>CFBundleDisplayName</key><string>Solstice</string>
 <key>CFBundleExecutable</key><string>SolsticeInstaller</string>
 <key>CFBundlePackageType</key><string>APPL</string>
 <key>CFBundleShortVersionString</key><string>$version</string>
@@ -59,6 +68,7 @@ cat > "$installer/Contents/Info.plist" <<PLIST
 <key>CFBundleIconFile</key><string>Solstice</string>
 <key>LSMinimumSystemVersion</key><string>13.0</string>
 <key>NSHighResolutionCapable</key><true/>
+<key>LSApplicationCategoryType</key><string>public.app-category.utilities</string>
 </dict></plist>
 PLIST
 
@@ -97,7 +107,8 @@ tell application "Finder"
         set icon size of opts to 112
         set text size of opts to 13
         set background picture of opts to file ".background:background.png"
-        set position of item "Install Solstice.app" to {150, 275}
+        set position of item "Solstice.app" to {180, 275}
+        set position of item "Applications" to {620, 275}
         close
         open
         update without registering applications
