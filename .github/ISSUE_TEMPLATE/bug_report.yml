@@ -1,0 +1,40 @@
+name: Bug report
+description: Report a reproducible problem with Solstice
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: Thank you for helping improve Solstice. Please do not include passwords, precise location data, or other private information.
+  - type: input
+    id: version
+    attributes:
+      label: Solstice version
+      placeholder: "1.10"
+    validations:
+      required: true
+  - type: input
+    id: mac
+    attributes:
+      label: Mac and macOS
+      placeholder: "MacBook Air M1, macOS 26.6.1"
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Explain exactly what you did and what happened.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: displays
+    attributes:
+      label: Display setup and additional context
+      description: Include display resolution, number of displays, and a safe screenshot when useful.

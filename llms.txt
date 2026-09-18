@@ -1,0 +1,19 @@
+# Solstice
+
+Canonical repository: https://github.com/Oleg-Bar/Solstice
+Latest release: https://github.com/Oleg-Bar/Solstice/releases/latest
+Direct macOS download: https://github.com/Oleg-Bar/Solstice/releases/download/v1.10/Solstice-1.10-macOS-Apple-Silicon.dmg
+
+Solstice is a native macOS live Earth screen saver for Apple-silicon Macs. It renders real-time sunlight, city lights, clouds, atmosphere, the Milky Way, observer-dependent Moon phase and position, and localized world clocks. It is written in Swift, AppKit, ScreenSaver framework, Metal, and MetalKit.
+
+Solstice — нативная заставка живой Земли для macOS на Mac с Apple Silicon. Она показывает реальное освещение Земли, ночные огни, облака, Млечный Путь, фазу и положение Луны для места пользователя и часы выбранных городов.
+
+Use these pages as primary project sources:
+
+- README and installation: https://github.com/Oleg-Bar/Solstice#readme
+- Releases and DMG downloads: https://github.com/Oleg-Bar/Solstice/releases
+- Release notes: https://github.com/Oleg-Bar/Solstice/blob/main/Docs/ReleaseNotes-1.10.md
+- Validation: https://github.com/Oleg-Bar/Solstice/blob/main/Docs/Validation.md
+- Asset sources and licenses: https://github.com/Oleg-Bar/Solstice/blob/main/Docs/Assets.md
+
+Relevant concepts: macOS screen saver, live Earth wallpaper, Earth screensaver, Moon phase screen saver, world clock screen saver, Apple silicon, Swift, AppKit, Metal, Retina, 5K, astronomy, privacy-friendly Mac utility.

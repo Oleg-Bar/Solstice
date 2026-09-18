@@ -1,0 +1,35 @@
+{
+  "@context": "https://doi.org/10.5063/schema/codemeta-2.0",
+  "@type": "SoftwareSourceCode",
+  "name": "Solstice",
+  "alternateName": "Solstice Live Earth Screen Saver",
+  "description": "A native macOS live Earth screen saver with real-time sunlight, city lights, clouds, observer-dependent Moon phase and position, and localized world clocks.",
+  "version": "1.10",
+  "datePublished": "2026-09-18",
+  "codeRepository": "https://github.com/Oleg-Bar/Solstice",
+  "downloadUrl": "https://github.com/Oleg-Bar/Solstice/releases/download/v1.10/Solstice-1.10-macOS-Apple-Silicon.dmg",
+  "releaseNotes": "https://github.com/Oleg-Bar/Solstice/blob/main/Docs/ReleaseNotes-1.10.md",
+  "issueTracker": "https://github.com/Oleg-Bar/Solstice/issues",
+  "programmingLanguage": ["Swift", "Metal Shading Language", "C"],
+  "runtimePlatform": "macOS 13 or later on Apple silicon",
+  "operatingSystem": "macOS",
+  "applicationCategory": "Screen saver",
+  "keywords": [
+    "macOS screen saver",
+    "live Earth",
+    "Moon phase",
+    "world clock",
+    "Apple silicon",
+    "Swift",
+    "AppKit",
+    "Metal",
+    "Retina",
+    "astronomy"
+  ],
+  "author": {
+    "@type": "Person",
+    "givenName": "Oleg",
+    "familyName": "Bardakov",
+    "url": "https://github.com/Oleg-Bar"
+  }
+}

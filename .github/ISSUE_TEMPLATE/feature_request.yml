@@ -1,0 +1,29 @@
+name: Feature request
+description: Suggest a focused improvement for Solstice
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: need
+    attributes:
+      label: What would you like Solstice to do?
+      description: Describe the user need and why it would be useful.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Suggested behavior
+      description: Explain the smallest clear version of the feature.
+    validations:
+      required: true
+  - type: dropdown
+    id: network
+    attributes:
+      label: Would this require new network access?
+      options:
+        - "No"
+        - "Yes"
+        - "Not sure"
+    validations:
+      required: true

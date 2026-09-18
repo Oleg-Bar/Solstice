@@ -1,280 +1,133 @@
-# Solstice — живая Земля на экране вашего Mac
+# Solstice — Live Earth Screen Saver for macOS
 
-![Solstice — живая Земля, Луна и часы городов в Retina 5K](Docs/GitHub-Previews/Solstice-Retina-5K.png)
+[![Latest release](https://img.shields.io/github/v/release/Oleg-Bar/Solstice?display_name=tag&style=flat-square)](https://github.com/Oleg-Bar/Solstice/releases/latest)
+[![macOS 13+](https://img.shields.io/badge/macOS-13%2B-black?style=flat-square&logo=apple)](https://github.com/Oleg-Bar/Solstice/releases/latest)
+[![Apple silicon](https://img.shields.io/badge/Apple%20silicon-M1%2B-black?style=flat-square&logo=apple)](https://github.com/Oleg-Bar/Solstice/releases/latest)
+[![Swift](https://img.shields.io/badge/Swift-5-orange?style=flat-square&logo=swift)](https://www.swift.org/)
 
-Превратите экран Mac в спокойный вид на нашу планету из космоса.
+![Solstice showing the live Earth, Moon, and world clocks](Docs/GitHub-Previews/Solstice-Retina-5K.png)
 
-Solstice показывает Землю в реальном времени: солнечный свет медленно движется по поверхности, города погружаются в ночь и зажигают огни, облака окружают планету, а Луна появляется в своей актуальной фазе и положении относительно наблюдателя.
+Solstice is a native macOS screen saver that renders a living Earth with real-time sunlight, city lights, clouds, the Moon's current phase and observer-dependent position, and local clocks for the cities that matter to you.
 
-Добавьте важные для вас города — дом, семью, друзей или любимые места. Рядом с каждым городом появятся элегантные аналоговые часы, автоматически учитывающие часовой пояс, переход на летнее время и текущий день или ночь. Светлый циферблат отображается днём, тёмный — ночью.
+## Download
 
-Solstice создана для экранов Retina и 5K. Детализированные текстуры Земли, мягкое атмосферное свечение и ненавязчивый Млечный Путь создают глубокую, кинематографичную композицию без лишних элементов.
+### [Download Solstice 1.10 for Apple silicon](https://github.com/Oleg-Bar/Solstice/releases/download/v1.10/Solstice-1.10-macOS-Apple-Silicon.dmg)
 
-## Что делает Solstice особенной
+One file is all you need: **`Solstice-1.10-macOS-Apple-Silicon.dmg`** (about 41 MB).
 
-- Реальное освещение Земли для текущей даты и времени.
-- Актуальная фаза, положение и масштаб Луны.
-- Автоматическое определение города по IP — только с вашего разрешения.
-- Часы любых выбранных городов с правильными часовыми поясами.
-- Автоматическая локализация названий городов на язык macOS.
-- Дневные и ночные циферблаты.
-- Поддержка Retina и разрешения 5K.
-- Минимальная частота обновления для экономии батареи.
-- Отсутствие рекламы, аккаунтов и фоновых служб.
-- Все астрономические вычисления выполняются непосредственно на Mac.
+Requirements: an Apple-silicon Mac (M1 or newer) running macOS 13 or later. The current release was verified on macOS Tahoe 26.6.1.
 
-Solstice — это не просто заставка. Это живой взгляд на Землю, время и расстояние между людьми.
+> The public build is currently ad-hoc signed because the project does not yet have an Apple Developer ID certificate. macOS may ask you to confirm the first launch. Never disable Gatekeeper globally.
 
-**Весь мир. Один экран. Ваше время.**
+## Install and configure
 
-Единственное необязательное сетевое обращение — определение приблизительного города через `ipwho.is`; оно выполняется только после согласия, при запуске и затем не чаще одного раза в 12 часов.
+1. Download the DMG using the button above.
+2. Open `Solstice-1.10-macOS-Apple-Silicon.dmg`.
+3. Drag **Solstice** onto **Applications**.
+4. Eject the Solstice disk image and open **Solstice** from Applications.
+5. If macOS says the developer cannot be verified, Control-click Solstice, choose **Open**, and confirm. Alternatively, use **System Settings → Privacy & Security → Open Anyway** only for the DMG downloaded from this repository.
+6. In the Solstice window, select **Install**.
+7. Open **System Settings → Wallpaper → Screen Saver**, scroll to **Other**, and choose **Solstice**.
+8. Open **System Settings → Lock Screen** to choose the idle delay. Set the password requirement to **Immediately** if the session must lock as soon as the saver starts.
 
-**Текущая версия: Solstice 1.10.** Проект находится на этапе подготовки к распространению. Перед публичной продажей готовую сборку необходимо подписать сертификатом Apple Developer ID и нотариализировать.
+Use **Start and Lock** in the Solstice app when you want the animation to appear before the protected macOS login screen. The standard macOS **Lock Screen** command goes directly to the login screen and does not launch third-party screen savers.
 
-Рабочее название движка и приложения — **Terra**, название проекта и продукта — **Solstice**.
+## What Solstice does
 
-## Установка для покупателей
+- Renders daylight, night, city lights, clouds, atmosphere, and the Milky Way with Metal.
+- Calculates the Moon's phase, distance, horizon visibility, and apparent orientation for the observer.
+- Shows localized clocks for user-selected cities, including time zones and daylight-saving transitions.
+- Supports Retina and 5K output while running at a battery-conscious 1 frame per second.
+- Can determine an approximate current city through `ipwho.is`, but only after explicit permission.
+- Runs locally without accounts, advertising, analytics, or background services.
 
-Готовый файл релиза называется `Solstice-1.10-macOS-Apple-Silicon.dmg` и предназначен для Mac с процессорами Apple Silicon (M1 и новее), macOS 13 или новее.
+## Privacy
 
-1. Откройте загруженный DMG.
-2. Перетащите **Solstice** на ярлык **Applications / Программы**.
-3. Откройте Solstice из папки «Программы» или Launchpad.
-4. При желании сначала выберите **Предпросмотр**, затем нажмите **Установить**.
-5. В открывшихся настройках macOS выберите **Solstice** в разделе «Другие».
+Astronomical calculations and rendering happen entirely on the Mac. The only optional network request is approximate IP-based city detection through `ipwho.is`. Solstice asks first, does not send precise device coordinates, and refreshes no more than once every 12 hours. Update checks run only when requested by the user.
 
-Приложение работает только в учётной записи текущего пользователя и копирует `Solstice.saver` в `~/Library/Screen Savers/`; права администратора для этой операции не нужны. Оно также умеет открыть настройки и полностью удалить заставку, её настройки и собственные служебные данные. Перед публичным распространением DMG, приложение и заставка должны быть подписаны сертификатом Apple Developer ID и нотариализированы.
+## Uninstall completely
 
-## 1. Что создано
+Open **Solstice** from Applications and choose **Uninstall Completely**. The app removes the installed screen saver, Solstice preferences, owned caches, saved state, and known legacy Terra user files, then moves itself to the Trash. The downloaded DMG remains in Downloads so you can remove it separately.
 
-- `Terra.saver` — устанавливаемый модуль системной заставки.
-- `Terra Preview.app` — отдельное приложение с тем же движком и состоянием сцены.
-- `Terra.xcodeproj` — проект Xcode с целями TerraPreview, TerraSaver и TerraCoreTests.
-- `Sources/` — все исходники Swift; `Resources/` — локальные карты Solar System Scope / NASA и Metal-шейдер.
-- Проверки координат, Солнца, часовых поясов, видимости и перехода через горизонт.
+## Known macOS behavior
 
-## 2. Актуальный механизм macOS — проверено 05.09.2026
+- macOS 26 Tahoe currently displays a generic blue tile for third-party `.saver` bundles even when custom thumbnails are present. The large live preview and full screen saver render correctly.
+- macOS owns the login interface, idle delay, password timing, display sleep, and the standard Lock Screen command.
+- Multi-display setups, Intel Macs, and macOS versions other than the verified environment require additional hardware testing.
 
-На машине разработки: **macOS Tahoe 26.6.1, Apple Silicon, Swift 6.3.3, Command Line Tools**. В актуальной таблице Apple указана Tahoe 26.6.2; на ней этот проект отдельно не тестировался. [Версии macOS](https://support.apple.com/es-es/109033).
+## Verification and source
 
-Apple по-прежнему публикует **ScreenSaver framework / ScreenSaverView**. В установленном SDK класс не помечен deprecated. Он предоставляет создание вида, `startAnimation`, `stopAnimation`, `animateOneFrame` и системный preview. Поэтому выбран публичный `.saver` bundle с подклассом ScreenSaverView. Более нового публичного API для произвольной сторонней интерактивно отрисовываемой заставки в изученных документах Apple не найдено. Это вывод по доступной документации, а не обещание неизменности системного хоста.
+Solstice 1.10 passes 18 automated tests with 3,440 assertions and zero failures. The release DMG passes `hdiutil verify`; its packaged screen saver is identical to the tested build. See [validation details](Docs/Validation.md), [release notes](Docs/ReleaseNotes-1.10.md), and [asset credits](Docs/Assets.md).
 
-Рендеринг — **Metal + MetalKit**, интерфейс — **AppKit**, язык — **Swift**. SceneKit исключён: Apple объявила его deprecated в Xcode 26. RealityKit подходит для многих 3D-приложений, но здесь Metal позволяет напрямую управлять освещением, частотой кадров и общим NSView внутри системного хоста без дополнительного движка сцены.
-
-Источники: [Screen Saver](https://developer.apple.com/documentation/screensaver), [ScreenSaverView](https://developer.apple.com/documentation/screensaver/screensaverview), [MTKView](https://developer.apple.com/documentation/metalkit/mtkview), [Xcode 26 — SceneKit](https://developer.apple.com/documentation/Xcode-Release-Notes/xcode-26-release-notes).
-
-### Ограничения современной macOS
-
-- `.saver` — модуль, который загружает системный процесс; конкретное поведение миниатюры, нескольких дисплеев и блокировки зависит от версии macOS.
-- В macOS 26 Tahoe сторонний `.saver` получает стандартную голубую миниатюру: система игнорирует находящиеся в bundle `thumbnail.png` и `thumbnail@2x.png`. Поддерживаемого способа заменить эту плитку сейчас нет; верхний живой предпросмотр Solstice работает нормально.
-- Публичный API не даёт этой сцене гарантированного постоянного присутствия за системным окном входа и переходов, идентичных встроенным aerial-заставкам. Preview fullscreen также не блокирует Mac.
-- Пароль после заставки, время запуска и отключение дисплея настраивает пользователь средствами macOS. Terra этих настроек не меняет.
-- После обновления bundle системный хост может продолжить использовать старую загруженную версию. Закройте Settings; если повторный выбор не помогает, выйдите из учётной записи и войдите снова. Принудительно завершать системные процессы не требуется.
-- Установка в системные настройки и ручной запуск через системный `ScreenSaverEngine` с защищённым экраном блокировки проверены на macOS 26.6.1. Автоматический запуск после полного интервала бездействия, длительный сеанс и другие версии macOS требуют отдельной проверки.
-
-## 3. Требования
-
-Основная цель — Mac M1 и новее. Минимальный deployment target — macOS 13; фактически проверена macOS 26.6.1. Более ранние системы требуют отдельной проверки.
-
-Для запуска готового preview дополнительные инструменты не нужны. Для сборки достаточно актуальных Apple Command Line Tools (`xcode-select --install`, если отсутствуют). Для работы в IDE нужен полный Xcode 26 или новее. Сторонние пакеты не требуются.
-
-На текущем Mac полный Xcode отсутствует. Установленный Swift Package Manager содержит несогласованные публичные и private-интерфейсы PackageDescription: его manifest не компилируется/не линкуется. Поэтому проверенный путь здесь — `Scripts/build.sh` и `Scripts/test.sh`, которые используют Swift напрямую. Системные файлы не изменялись. `Package.swift` оставлен как дополнительный вариант для исправной установки Swift 6 с XCTest; этот путь здесь не подтверждён. Основной проект для IDE — `Terra.xcodeproj`; его структура проверена, сборка именно через Xcode требует установленного Xcode.
-
-## 4. Архитектура
-
-```text
-Terra/
-├── Terra.xcodeproj          Xcode: Preview / Saver / Tests
-├── Package.swift            дополнительный Swift Package
-├── Sources/
-│   ├── Core/
-│   │   ├── Geometry.swift                 география, камера, горизонт
-│   │   ├── SolarPositionCalculator.swift   Солнце и приближённая фаза Луны
-│   │   ├── CitiesConfiguration.swift      города и местное время
-│   │   └── SceneConfiguration.swift       параметры и debug timeline
-│   ├── Rendering/
-│   │   ├── EarthRenderer.swift            Metal pipeline и снимки
-│   │   ├── EarthSceneView.swift           общий вид и цикл кадров
-│   │   └── SceneAssets.swift              локальные ресурсы bundle
-│   ├── UI/                                часы, подписи, скрытые города
-│   ├── Preview/                           окно и панель настройки
-│   └── Screensaver/                       адаптер ScreenSaverView
-├── Resources/                             карты Solar System Scope / NASA + Scene.metal
-├── Tests/                                 математические unit tests
-├── Scripts/                               сборка, тесты, проверочный хост
-├── Docs/                                  ТЗ, источники, QA и снимки
-└── Build/products/                        готовые .app и .saver
-```
-
-Земля и облака — аналитические 3D-сферы: Metal вычисляет пересечение ортографического луча со сферой, нормаль, UV и освещение для каждого пикселя. Это полноценная объёмная поверхность, без полигональной сетки и её швов. `CameraBasis` используется и GPU, и проекцией городов. Долгота положительна на восток, север — +Y, Гринвич — +Z.
-
-Ускоренное визуальное вращение реализовано движением точки обзора вокруг Земли. Направление Солнца вычисляется в земных координатах и не зависит от скорости обзора. Таким образом город на освещённой территории не становится ночным только из-за художественного вращения.
-
-Терминатор использует UTC и приближение NOAA; между солнечными высотами приблизительно −6° и +4° — мягкий переход. Ночное свечение берётся из карты огней. Облака находятся на отдельной сфере радиусом 1.007. Атмосферный край — художественное приближение рассеяния.
-
-Часы рисуются в плоскости экрана с центром в географической точке; соединительная линия появляется только при смещении из-за пересечения подписей. Перед горизонтом их прозрачность плавно меняется по smoothstep; внешний индикатор имеет дополняющую прозрачность. Его положение определяется направлением проекции города. Тонкая полупрозрачная дуга со скользящим бликом и наконечником связывает часы с краем Земли. При очень маленьком диске все часы вынесены наружу, чтобы не закрывать планету.
-
-```text
-┌───────────────────────────────────────────────────────┐
-│               спокойное свободное пространство         │
-│                                                       │
-│       ◷                    ◷                 ☾        │
-│  скрытый город       .─────────────.          Луна     │
-│                     /    Земля      \                 │
-│                    │  день → ночь    │                │
-│                     \               /                 │
-│                       '───────────'                   │
-└───────────────────────────────────────────────────────┘
-```
-
-## 5. Запуск Preview
-
-### Уже собранное приложение
-
-Откройте `Build/products/Terra Preview.app` двойным щелчком в Finder.
-
-Также можно дважды щёлкнуть `OPEN_TERRA.command` в корне проекта. Это короткий запускаемый файл без зависимости от клика по ссылке на `.app` внутри чата.
-
-- Изменение размера окна — обычным перетаскиванием границы.
-- Полный экран — зелёная кнопка окна или **Control–Command–F**.
-- Добавить город — стеклянная кнопка в левом нижнем углу или **Command–N**.
-- Удалить добавленный город — кнопка `−` рядом или меню **Terra Preview → Удалить город…**.
-- Проверить обновление — маленький стеклянный значок перед подписью `created by Oleg Bardakov` в правом нижнем углу. Сетевой запрос выполняется только после нажатия.
-- Завершить — **Command–Q**.
-
-### Из исходников без Xcode
-
-Откройте Terminal в папке `Terra` и выполните:
-
-```bash
-bash Scripts/preview.sh
-```
-
-### В Xcode
-
-1. Откройте `Terra.xcodeproj`.
-2. Выберите схему **TerraPreview**, устройство **My Mac**.
-3. Нажмите **Command–R**.
-4. Для математических тестов используйте **Command–U**.
-
-Схема **TerraSaver** предназначена для сборки bundle; запускать `.saver` как приложение нельзя. Для разработки всегда используйте TerraPreview.
-
-## 6. Сборка Release
-
-В Terminal в папке `Terra`:
+Build locally:
 
 ```bash
 bash Scripts/test.sh
 bash Scripts/build.sh
 ```
 
-Результат:
+Creating a distributable DMG additionally uses the standard macOS `hdiutil` and Finder tools:
 
-```text
-Build/products/Terra Preview.app
-Build/products/Terra.saver
+```bash
+bash Scripts/package-dmg.sh
 ```
 
-Скрипт собирает код для архитектуры текущего Mac, копирует локальные ресурсы, включает Hardened Runtime и проверяет подпись обоих bundle. Если в Keychain доступен сертификат `Developer ID Application`, он выбирается автоматически; его также можно указать через `TERRA_SIGN_IDENTITY`. Без сертификата создаётся локальная ad-hoc подпись с Hardened Runtime. На этой машине результат — arm64. Для M1 этого достаточно. Это не универсальный дистрибутив для всех Mac.
+The release is ad-hoc signed. Public commercial distribution should use an Apple Developer ID certificate and Apple notarization.
 
-Полный Xcode, Apple Developer membership и App Store для локальной сборки этим способом не требуются. Ad-hoc подпись не является нотариализацией: её проверка подтверждает целостность локального bundle, но не гарантирует прохождение Gatekeeper при передаче на другой Mac. Для распространения потребуется отдельная подготовка Developer ID signing/notarization. Не отключайте Gatekeeper и не снимайте quarantine с неизвестных файлов.
+For help, use [GitHub Issues](https://github.com/Oleg-Bar/Solstice/issues). Security reports should follow [SECURITY.md](SECURITY.md). Third-party code and image rights are documented in [Resources/ThirdParty.txt](Resources/ThirdParty.txt) and [Docs/Assets.md](Docs/Assets.md). Copyright © 2026 Oleg Bardakov.
 
-Проект Xcode можно пересоздать после добавления файлов: `python3 Scripts/generate-xcode-project.py`. Обычное изменение существующих файлов генерации не требует.
+---
 
-## 7. Установка заставки
+# Solstice — живая Земля на экране Mac
 
-1. Сначала откройте Terra Preview и убедитесь, что сцена отображается.
-2. В Finder откройте папку проекта → `Build` → `products`.
-3. Дважды щёлкните **Terra.saver**.
-4. Если macOS предложит выбор, установите **только для текущего пользователя**.
-5. Откройте системные настройки и выберите Terra по шагам ниже.
+Solstice — нативная заставка для macOS: живая Земля с реальным солнечным освещением, ночными огнями, облаками, актуальной фазой и положением Луны и часами выбранных городов.
 
-Если двойной щелчок не открывает установщик, ручной вариант:
+## Скачать
 
-1. В Finder нажмите **Shift–Command–G**.
-2. Введите `~/Library/Screen Savers/`.
-3. Если папки `Screen Savers` нет, создайте её внутри своей `Library`.
-4. Скопируйте туда **Terra.saver** целиком.
-5. Закройте и снова откройте системные настройки.
+### [Скачать Solstice 1.10 для Mac с Apple Silicon](https://github.com/Oleg-Bar/Solstice/releases/download/v1.10/Solstice-1.10-macOS-Apple-Silicon.dmg)
 
-Покупатель устанавливает `Solstice.app` в Applications, чтобы приложение было видно в Finder, Launchpad и Spotlight. Кнопка «Установить» внутри приложения устанавливает только пользовательский bundle `Solstice.saver` и не меняет выбранную заставку автоматически.
+Нужен только один файл: **`Solstice-1.10-macOS-Apple-Silicon.dmg`**, около 41 МБ. Поддерживаются Mac M1 и новее с macOS 13 или более новой системой.
 
-Кнопка **«Запустить и заблокировать»** открывает выбранную заставку через штатный `ScreenSaverEngine`. Чтобы возврат к сеансу всегда требовал пароль, выберите **Системные настройки → Экран блокировки → Запрашивать пароль при появлении заставки или выключении дисплея → Сразу**. Защищённый экран входа macOS стороннему `.saver` заменить нельзя.
+> Сборка пока подписана локальной ad-hoc подписью: сертификата Apple Developer ID у проекта ещё нет. При первом запуске macOS может попросить дополнительное подтверждение. Не отключайте Gatekeeper полностью.
 
-## 8. Выбор в macOS Tahoe
+## Установка для новичка
 
-По текущему руководству Apple: **Системные настройки → Обои → Заставка → Пользовательская (Custom) → Другие (Other)**. Найдите Terra, выберите её и запустите Preview. В некоторых локализациях подписи немного отличаются. На более ранних macOS «Заставка» может быть отдельным пунктом боковой панели.
+1. Нажмите ссылку **Скачать** выше.
+2. Откройте загруженный файл `Solstice-1.10-macOS-Apple-Silicon.dmg`.
+3. Перетащите значок **Solstice** на значок **Applications / Программы**.
+4. Извлеките диск Solstice и откройте приложение из папки «Программы».
+5. Если macOS не может проверить разработчика, нажмите по Solstice с удержанием Control, выберите **Открыть** и подтвердите. Другой безопасный путь: **Системные настройки → Конфиденциальность и безопасность → Всё равно открыть** — только для DMG, загруженного из этого репозитория.
+6. В окне Solstice нажмите **Установить**.
+7. Перейдите в **Системные настройки → Обои → Заставка**, прокрутите до раздела **Другие** и выберите **Solstice**.
+8. В разделе **Экран блокировки** задайте время запуска. Для немедленной защиты выберите запрос пароля **Сразу**.
 
-Время до запуска и запрос пароля регулируются в **Экран блокировки**; запуск через угол — в **Рабочий стол и Dock → Активные углы**. [Инструкция Apple](https://support.apple.com/guide/mac-help/use-a-screen-saver-mchl4b68853d/mac).
+Кнопка **Запустить и заблокировать** сначала показывает Solstice, а затем оставляет защищённый экран входа macOS. Обычная команда macOS **Заблокировать экран** сразу показывает окно входа и не запускает сторонние заставки.
 
-## 9. Обновление
+## Возможности
 
-1. Измените исходники/конфигурацию, проверьте preview.
-2. Закройте preview, завершите показ заставки и закройте System Settings.
-3. Выполните тесты и `bash Scripts/build.sh`.
-4. Замените установленную `Terra.saver` новым bundle через Finder.
-5. Снова выберите её в System Settings. При сохранении старой версии выйдите и войдите в свою учётную запись.
+- День, ночь, огни городов, облака, атмосфера и Млечный Путь на Metal.
+- Фаза, расстояние, видимость над горизонтом и ориентация Луны для места наблюдателя.
+- Часы выбранных городов с часовыми поясами и переходами на летнее время.
+- Retina и 5K при экономной частоте один кадр в секунду.
+- Необязательное определение примерного города по IP только после разрешения.
+- Без аккаунта, рекламы, аналитики и фоновых служб.
 
-## 10. Полное удаление и расположение файлов
+## Приватность и удаление
 
-1. Откройте `Solstice.app` из папки «Программы».
-2. Нажмите **Удалить полностью…** и подтвердите действие.
-3. Приложение удалит `~/Library/Screen Savers/Solstice.saver`, домены настроек Solstice и известные собственные кэши/сохранённое состояние, затем переместит себя в Корзину.
-4. Выберите другую заставку в macOS и очистите Корзину, когда больше не требуется возможность восстановления.
+Вычисления и графика работают локально. Единственный необязательный запрос — примерное определение города через `ipwho.is`; точные координаты Mac не отправляются. Проверка обновлений выполняется только по вашей команде.
 
-macOS не позволяет обычному приложению из DMG добавлять крестик удаления в Launchpad: этот элемент управляется системой и предназначен прежде всего для приложений из Mac App Store. Перетаскивание Solstice в Корзину удаляет само приложение, но не может запустить очистку заставки, поэтому для полного удаления предусмотрена кнопка внутри Solstice. Приложение не удаляет загруженный DMG и не трогает общие системные кэши macOS.
+Для полного удаления откройте Solstice в папке «Программы» и нажмите **Удалить полностью**. Приложение удалит заставку, свои настройки, кэши и сохранённое состояние, затем переместит себя в Корзину. DMG в папке «Загрузки» можно удалить отдельно.
 
-## 11. Добавление и удаление городов
+## Для разработчиков
 
-С отступом от левого нижнего края Preview расположены компактная стеклянная кнопка `Добавить город` и системная кнопка `−`. Добавление открывает нативный поиск AppKit с постоянно видимым списком совпадений. При каждом введённом символе сначала показываются совпадения с началом названия, затем вхождения внутри названия города, страны и часового пояса. `−` позволяет удалить любой выбранный город, включая исходные Madrid, Singapore и New York. Удалить нельзя только текущий город наблюдателя, определённый по IP; при смене IP-города прежний снова становится обычным управляемым городом.
+Проверка версии 1.10: 18 автоматических тестов, 3 440 проверок, 0 ошибок. Подробности находятся в [Validation.md](Docs/Validation.md), изменения версии — в [ReleaseNotes-1.10.md](Docs/ReleaseNotes-1.10.md), источники изображений — в [Assets.md](Docs/Assets.md).
 
-Координаты и часовые пояса читаются из установленной в macOS базы `tzdb` (`zone.tab`). Видимые названия городов получает системный форматтер macOS из встроенных данных CLDR: при русском языке это, например, «Мадрид», при китайском — «马德里», при английском и испанском — `Madrid`. При следующем запуске сохранённый набор также получает названия на текущем языке системы. Поиск и локализация работают локально и не отправляют введённый текст в интернет. Выбранный набор сохраняется в общем домене настроек Terra, доступном Preview и заставке. Техническая панель настройки сцены пользователю не показывается.
+---
 
-Редактируйте массив в `Sources/Core/CitiesConfiguration.swift`:
+## A small planet, quietly alive
 
-```swift
-City(name: "Tokyo", latitude: 35.6762, longitude: 139.6503,
-     timeZoneIdentifier: "Asia/Tokyo")
-```
+Day crosses oceans. Cities glow. The Moon keeps its patient course. Solstice turns an idle screen into a calm reminder that every place — and everyone you miss — shares the same moving world.
 
-Потом пересоберите проект. Удаление — убрать строку из массива. Используются IANA TimeZone macOS, а не постоянные UTC offsets. DST, переход через полночь и AM/PM вычисляются системой. Неверный идентификатор/координаты явно выявляются при запуске, а не тихо заменяются UTC.
+## Маленькая планета, которая тихо живёт
 
-## 12. Визуальные параметры и debug time
-
-Все значения — в `Sources/Core/SceneConfiguration.swift`. Максимальный диаметр Земли — 70% меньшей стороны, центр — 43% высоты снизу. При реальном масштабе камера отдаляется, чтобы вместить проекцию Земли и Луны; видимые размеры могут стать очень маленькими. Размеры тел и расстояние имеют единый масштаб. При заходе Луны камера плавно возвращается к крупной Земле.
-
-Пользовательский Preview показывает только добавление/удаление городов, запрос согласия на IP и полноэкранный режим. Технические параметры остаются в `SceneConfiguration.swift` и в пользовательском интерфейсе не показываются. Луна всегда имеет физически верный размер относительно Земли; экранное расстояние компактно нормализовано, чтобы Земля оставалась читаемой.
-
-**Время 1× / 10× / 100× / 1000×** ускоряет дату, Солнце и часы. Возврат к 1× возвращает настоящее время Mac. **Облёт 1× / 10× / 100×** меняет только визуальное движение. В установленной заставке debug-время недоступно, даже в миниатюре системных настроек. Параметры preview временные; чтобы включить их в `.saver`, перенесите значения в SceneConfiguration и пересоберите.
-
-## 13. Производительность и известные границы версии 1.10
-
-- Цель — 1 fps: это минимальная практическая частота для максимальной экономии батареи; часы, освещение и положение Луны остаются актуальными раз в секунду, но переходы камеры и блик становятся ступенчатыми. Один Metal draw call использует аналитические сферы и локальные текстуры с mipmaps.
-- До трёх GPU-команд в работе, кадр пропускается при заполнении очереди. Максимальная сторона Metal drawable — 5120 пикселей для нативного вывода на 5K; часы остаются в разрешении AppKit/Retina.
-- `stopAnimation` останавливает подачу кадров. Приложение не отрисовывает перекрытое окно. Математика не использует сеть и не создаёт отдельных worker-процессов.
-- Облака и карты поверхности — исторические композиты NASA, **не текущая погода**. Фон Млечного Пути — панорама всего неба ESO/S. Brunier, художественно повёрнутая и приглушённая; дополнительные звёзды процедурные.
-- Луна: Astronomy Engine вычисляет расстояние, земную проекцию положения, фазу и ориентацию для наблюдателя. Появление зависит от высоты центра над геометрическим горизонтом: от 0 до 0,5° плавная прозрачность. Рефракция, рельеф, здания, погода и затмения не моделируются. Размеры в едином масштабе, расстояние — в ортографической проекции; это внешний вид системы, а не изображение неба из стоящего на земле наблюдателя. Подпись показывает расстояние между центрами тел. Проверка фаз выполнена по USNO; полная независимая проверка местного наклона не проведена.
-- Часы городов никогда не перекрывают лунный диск. `ClockPlacement.resolve` сначала удерживает центр часов в экранных ограничителях, затем выталкивает зарезервированный конверт (циферблат плюс две строки подписи) из диска Луны по кратчайшей оси, которая ещё помещается на экран; если не помещается ни одна, приоритет у Луны. Для часов на видимой стороне разрешение применяется после сглаживания, поэтому от Луны чист каждый отрисованный кадр, включая кадры переходов. Пока Луна под горизонтом и не рисуется, препятствие не резервируется. Инвариант покрыт тестом `world city clocks never cover the lunar disc`: весь каталог `zone.tab` macOS (448 города) × 36 ракурсов камеры × 12 часов × 3 наблюдателя, около 316 000 размещений на каждый размер окна; минимальный зазор между дисками составил +8,9…+11,7 pt для скрытых индикаторов и +30…+59 pt для часов на видимой стороне при 1440×900, 1440×500 и 900×700, выходов за экран нет.
-- Стрелки скрытых городов привязаны к краю по направлению проекции. Проверены три заданных города. Плотные произвольные списки городов потребуют дополнительной компоновки.
-- Неизменяемые Metal pipeline и текстуры загружаются один раз на GPU и разделяются между всеми экземплярами заставки в одном процессе. Каждый монитор сохраняет только собственную очередь команд, drawable и композицию. Одиночный 5K-кадр проверен реальным Metal-рендером; реальные несколько мониторов ещё требуют отдельной проверки.
-- Не проведены длительное измерение энергопотребления через Instruments и полный автоматический idle/unlock-прогон. Ручной запуск через системный `ScreenSaverEngine` с защищённым экраном блокировки проверен. Короткий замер Preview на MacBook Air M1 при 1 fps показал 249–325 МБ памяти (после перехода на полноценные 5K GPU-карты — около 325 МБ) и переменную нагрузку CPU в зависимости от видимости окна. Результаты зависят от Mac, дисплея и размера окна.
-
-Подробности проверок: [Validation.md](Docs/Validation.md). Источники и лицензии: [Assets.md](Docs/Assets.md). Восстановленное исходное ТЗ: [OriginalBrief.md](Docs/OriginalBrief.md).
-
-### Визуальное обновление 0.2
-
-Материал настроен по предоставленному ночному снимку NASA: чёрный фон, синие тени, золотистые города и тонкая атмосфера. Камера по умолчанию остаётся над городом наблюдателя. Сравнение: `Docs/Observer-Singapore.png` и `Docs/Reference-day.png` — 5 сентября 2026, 23:00 и 12:00 UTC, Madrid. Карты Земли и Млечного Пути заранее подготовлены с максимальной стороной 5120 пикселей и загружаются без изменения размера при запуске. Атрибуция: `Docs/Assets.md`, `Resources/ThirdParty.txt`.
-
-### Наблюдатель и Луна — 0.3
-
-Согласованные требования: `Docs/ObserverRequirements.md`.
-
-- `Docs/Observer-Singapore.png`: 6 сентября 2026, 20:00 в Singapore; Луна под горизонтом, Madrid и New York скрыты за Землёй.
-- `Docs/Observer-Madrid-physical.png`: 6 сентября, 08:00 в Madrid; реальный единый масштаб.
-- `Docs/Observer-Madrid-overview.png`: исторический кадр удалённого режима со сжатым расстоянием; этот режим больше не поддерживается.
-
-Все сохранённые кадры имеют подпись тестового времени. При обычном запуске Preview использует текущие часы Mac. Повторно включить определение текущего города можно через меню **Terra Preview → Определить город по IP…**. В `.saver` нет диагностических подписей.
-
-Город из IP/VPN добавляется в список часов автоматически, его координаты и часовой пояс берутся из ответа. Проверка выполняется при старте и затем не чаще одного раза в 12 часов; ракурс плавно обновляется. При ошибке сохраняется прежний город.
-
-Последнее уточнение пользователя: физическое соотношение размеров Земли и Луны используется всегда. Луна располагается рядом с Землёй в устойчивой горизонтальной композиции, а расстояние показано в компактном обзорном масштабе; иначе Земля становится ничтожно маленькой из-за реального удаления примерно в 60 земных радиусов. Наблюдатель по умолчанию определяется по IP.
+День пересекает океаны. Города зажигают огни. Луна продолжает свой неспешный путь. Solstice превращает экран в спокойное напоминание: все дорогие нам места и люди живут на одной движущейся Земле.

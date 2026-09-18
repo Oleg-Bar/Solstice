@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "If Solstice supports your work, please cite the software using this metadata."
+title: "Solstice: Live Earth Screen Saver for macOS"
+type: software
+authors:
+  - family-names: Bardakov
+    given-names: Oleg
+repository-code: "https://github.com/Oleg-Bar/Solstice"
+url: "https://github.com/Oleg-Bar/Solstice/releases/latest"
+version: "1.10"
+date-released: 2026-09-18
+keywords:
+  - macOS screen saver
+  - live Earth
+  - Moon phase
+  - world clock
+  - Apple silicon
+  - Swift
+  - Metal
